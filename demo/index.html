@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>tsante-mqtt demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../tsante-mqtt.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+  </head>
+  <body>
+    <div class="vertical-section-container centered">
+      <h3>Basic tsante-mqtt demo</h3>
+      <demo-snippet>
+        <template is="dom-bind" id="demo">
+          <tsante-mqtt id="mqtt"
+            host="ws://192.168.1.68:9883/"
+            topic="terminal/os/#">
+          </tsante-mqtt>
+          <script>
+          const demo = document.querySelector('#demo');
+          demo.$.mqtt.addEventListener("tsante-mqtt-received", evt => {
+            console.log(evt.detail);
+          })
+          </script>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>

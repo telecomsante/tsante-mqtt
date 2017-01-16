@@ -1,0 +1,143 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="./mqttws31.html">
+
+<!--
+`tsante-mqtt`
+A MQTT component
+
+@demo demo/index.html
+-->
+
+<dom-module id="tsante-mqtt">
+
+  <script>
+    Polymer({
+
+      is: 'tsante-mqtt',
+
+      properties: {
+        /**
+         * FDQN or IP of the mqtt server
+         * @type {String}
+         */
+        host: {
+          type: String,
+        },
+        /**
+         * Port to connect
+         * @type {Number}
+         */
+        port: {
+          type: Number,
+          value: 9883,
+        },
+        /**
+         * The topic to subscribe or to publish
+         * @type {String}
+         */
+        topic: {
+          type: String,
+        },
+        /**
+         * clientID
+         * @type {String}
+         */
+        clientID: {
+          type: String,
+        },
+        /**
+         * username
+         * @type {String}
+         */
+        user: {
+          type: String,
+        },
+        /**
+         * password
+         * @type {String}
+         */
+        password: {
+          type: String,
+        },
+        /**
+         * qos
+         *
+         * the value of the qos could be 0, 1, 2
+         * @type {Number}
+         */
+        qos: {
+          type: Number,
+          value: 0,
+        },
+        /**
+         * retain flag
+         * @type {Boolean}
+         */
+        retained: {
+          type: Boolean,
+          value: false,
+        },
+        /**
+         * timeout of the connection in seconds
+         * @type {Number}
+         */
+        timeout: {
+          type: Number,
+          value: 30,
+        },
+        /**
+         * sent by the server when the client disconnects abnormally.
+         * @type {String}
+         */
+        willMessage: {
+          type: Object,
+          value: function() { return {}; },
+        },
+
+        _client: {
+          type: Object,
+        },
+        _connected: {
+          type: Boolean,
+          value:false,
+        }
+      },
+
+      observers:[
+        '_subscribe(host, port, topic)',
+      ],
+
+      attached: function() {
+        console.log(this.host);
+        if(this.host) {
+          this._client = new Paho.MQTT.Client(this.host,"clientID");
+          this._client.onConnectionLost = this._onConnectionLost.bind(this);
+          this._client.onMessageArrived = this._onMessageArrived.bind(this);
+          this._client.connect({
+            onSuccess: this.onConnect.bind(this),
+          })
+        }
+      },
+
+      onConnect: function() {
+        console.log("onConnect");
+        this._connected = true;
+        this._client.subscribe(this.topic);
+      },
+
+      _subscribe: function(host, port, topic) {
+        console.log(host, port, topic);
+      },
+
+      _onConnectionLost: function(msg) {
+        console.log('connection lost');
+      },
+
+      _onMessageArrived: function(msg) {
+        console.log("received : ", msg.destinationName, msg.payloadString );
+        this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString })
+      },
+
+    });
+  </script>
+</dom-module>
