@@ -11,8 +11,13 @@
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../tsante-mqtt.html">
+    <link rel="import" href="../tsante-mqtt-subscriber.html">
+    <link rel="import" href="../tsante-mqtt-publisher.html">
 
     <style is="custom-style" include="demo-pages-shared-styles">
+      .vertical-section-container {
+        max-width:80%;
+      }
     </style>
   </head>
   <body>
@@ -20,14 +25,26 @@
       <h3>Basic tsante-mqtt demo</h3>
       <demo-snippet>
         <template is="dom-bind" id="demo">
-          <tsante-mqtt id="mqtt"
-            host="ws://192.168.1.68:9883/"
-            topic="terminal/os/#">
+          <style>
+          #debug > div { display: flex; border: 1px solid lightgray; height: 25px; align-items: center; }
+          #debug > div:nth-child(even) { background: lightgray; }
+          .topic { width: 150px; padding:0px 10px; text-overflow: ellipsis; overflow: hidden;}
+          </style>
+          <tsante-mqtt id="mqtt" host="ws://192.168.1.68:9883/" username="myapp" password="myapp">
+            <tsante-mqtt-subscriber topic="terminal/os/#"></tsante-mqtt-subscriber>
+            <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
+            <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" qos="1" retained ></tsante-mqtt-subscriber>
           </tsante-mqtt>
+          <div id="debug"></div>
           <script>
           const demo = document.querySelector('#demo');
           demo.$.mqtt.addEventListener("tsante-mqtt-received", evt => {
             console.log(evt.detail);
+            const div = document.createElement('div');
+            let content = `<div class='topic'>${evt.detail.topic}</div>`;
+            content+=  `<div class='payload'>${evt.detail.payload}</div>`;
+            div.innerHTML = content;
+            demo.$.debug.appendChild(div);
           })
           </script>
         </template>
