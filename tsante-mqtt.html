@@ -137,6 +137,11 @@ A MQTT component
         this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString })
       },
 
+      _onMessageDelivered: function(msg) {
+        console.log("received : ", msg.destinationName, msg.payloadString );
+        this.fire('tsante-mqtt-delivered', { topic:msg.destinationName, payload:msg.payloadString })
+      }
+
     });
   </script>
 </dom-module>

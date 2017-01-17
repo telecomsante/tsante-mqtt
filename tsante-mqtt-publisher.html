@@ -1,0 +1,64 @@
+<dom-module id="tsante-mqtt-publisher">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'tsante-mqtt-publisher',
+
+      properties: {
+        /**
+         * the topic to publish in
+         * @type {String}
+         */
+        topic: {
+          type: String,
+        },
+        /**
+         * qos
+         *
+         * the value of the qos could be 0, 1, 2
+         * @type {Number}
+         */
+        qos: {
+          type: Number,
+          value: 0,
+        },
+        /**
+         * retain flag
+         * @type {Boolean}
+         */
+        retained: {
+          type: Boolean,
+          value: false,
+        },
+        /**
+         * the payload to send
+         * @type {String}
+         */
+        payload: {
+          type: String,
+          observer: '_publish',
+        },
+      },
+
+      attached: function() {
+        parent.addEventListener('tsante-mqtt-connect', (evt) => {
+          if(evt.detail.status && this.payload) { this._publish(); }
+        });
+      },
+
+      _publish: function() {
+        if(this.parentElement.connected) {
+          console.log('publish');
+          this.parentElement.client.send(this.topic, this.payload, this.qos, this.retained);
+        }
+      }
+    });
+  </script>
+</dom-module>
