@@ -1,9 +1,20 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="./tsante-mqtt-subscriber.html">
+<link rel="import" href="./tsante-mqtt-publisher.html">
 <link rel="import" href="./mqttws31.html">
 
 <!--
 `tsante-mqtt`
 A MQTT component
+
+example :
+
+```
+<tsante-mqtt host="ws://test.mosquitto.org:8080/" >
+  <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
+  <tsante-mqtt-publisher topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
+</tsante-mqtt>
+```
 
 @demo demo/index.html
 -->
@@ -17,7 +28,11 @@ A MQTT component
 
       properties: {
         /**
-         * FDQN or IP of the mqtt server
+         * the url of the server
+         *
+         * by exapmple :
+         * `ws://test.mosquitto.org:8080/`
+         *
          * @type {String}
          */
         host: {
@@ -26,6 +41,9 @@ A MQTT component
 
         /**
          * clientID
+         *
+         * the clientID is used by the server to retrieve the previous session
+         *
          * @type {String}
          */
         clientID: {
@@ -68,11 +86,13 @@ A MQTT component
          */
         cleanSession: {
           type: Boolean,
-          value: false,
+          value: true,
         },
 
         /**
-         * sent by the server when the client disconnects abnormally.
+         * message sent by the server when the client disconnects abnormally.
+         *
+         *
          * @type {String}
          */
         willMessage: {
@@ -80,11 +100,19 @@ A MQTT component
           value: function() { return {}; },
         },
 
+        /**
+         * The mqtt client
+         * @type {Object}
+         */
         client: {
           type: Object,
           notify: true,
         },
 
+        /**
+         * the connection status
+         * @type {Boolean}
+         */
         connected: {
           type: Boolean,
           value:false,
@@ -100,16 +128,7 @@ A MQTT component
           this.client.onConnectionLost = this._onConnectionLost.bind(this);
           this.client.onMessageArrived = this._onMessageArrived.bind(this);
           this.client.onMessageDelivered = this._onMessageDelivered.bind(this);
-          const connectOption = {
-            onSuccess: this._onConnect.bind(this),
-            onFailure: this._onFail.bind(this),
-            timeout: this.timeout,
-            cleanSession: this.cleanSession,
-          };
-          if(this.username) { connectOption.userName = this.username; }
-          if(this.password) { connectOption.password = this.password; }
-
-          this.client.connect(connectOption);
+          this.connect();
         }
       },
 
@@ -124,23 +143,120 @@ A MQTT component
         throw new Error('fail to connect')
       },
 
+      /**
+       * Fired when the status of the connection change
+       *
+       * example of `evt.detail` :
+       *
+       * ```
+       * { status: true }
+       * ```
+       *
+       * @event tsante-mqtt-connect
+       * @param {Boolean} status the status of the connection
+       */
       _connectedChanged: function() {
         this.fire('tsante-mqtt-connect', { status: this.connected });
       },
 
       _onConnectionLost: function(msg) {
-        console.log('connection lost');
+        this._setConnected(false);
       },
 
+      /**
+       * fired when a message is read
+       *
+       * example of the `evt.detail` :
+       *
+       * ```
+       * {
+       *   topic: "terminal/hello",
+       *   payload: "polymer"
+       * }
+       * ```
+       *
+       * @event tsante-mqtt-received
+       * @param  {String} topic topic of the received message
+       * @param  {String} payload content of the received message
+       */
       _onMessageArrived: function(msg) {
-        console.log("received : ", msg.destinationName, msg.payloadString );
         this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString })
       },
 
+      /**
+       * called when a message has been delivered. All processing that this
+       * Client will ever do has been completed.
+       *
+       * @method _onMessageDelivered
+       * @param  {Object}            msg the delivered message
+       */
       _onMessageDelivered: function(msg) {
         console.log("received : ", msg.destinationName, msg.payloadString );
+        /**
+         * fired when a message has been delivered
+         *
+         * example of `evt.detail` :
+         * ```
+         * {
+         *    topic: 'terminal/hello',
+         *    payload: 'world'
+         * }
+         * ```
+         *
+         * @event tsante-mqtt-delivered
+         * @param {String} topic the topic
+         * @param {String} payload the content of the message
+         */
         this.fire('tsante-mqtt-delivered', { topic:msg.destinationName, payload:msg.payloadString })
-      }
+      },
+
+      /**
+       * open the connection to the server
+       *
+       * @method connect
+       */
+      connect: function() {
+        const connectOption = {
+          onSuccess: this._onConnect.bind(this),
+          onFailure: this._onFail.bind(this),
+          timeout: this.timeout,
+          cleanSession: this.cleanSession,
+        };
+        if(this.username) { connectOption.userName = this.username; }
+        if(this.password) { connectOption.password = this.password; }
+
+        try {
+          this.client.connect(connectOption);
+        } catch(err) {
+          this._onError(err.message);
+        }
+      },
+
+      /**
+       * disconnect the client
+       * @method disconnect
+       */
+      disconnect: function() {
+        try {
+          this.client.disconnect();
+        } catch(err) {
+          this._onError(err.message);
+        }
+      },
+
+      /**
+       * fired when an error occurs zhile connect or disconnect
+       *
+       * example of error :
+       *  - "AMQJS0011E Invalid state not connecting or connected."
+       *  - "AMQJS0011E Invalid state already connected."
+       *
+       * @event tsante-mqtt-error
+       * @param  {String} errMessage message of the error
+       */
+      _onError: function(errMessage) {
+        this.fire('tsante-mqtt-error', errMessage);
+      },
 
     });
   </script>

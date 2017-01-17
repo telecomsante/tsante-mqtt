@@ -1,3 +1,19 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`tsante-mqtt-publisher`
+
+A component to publish to a topic on a mqtt server. The component
+must be a children of `tsante-mqtt` component
+
+example :
+
+```
+<tsante-mqtt id="mqtt" host="ws://test.mosquitto.org:8080/" >
+  <tsante-mqtt-publisher topic="terminal/hello" payload="world"></tsante-mqtt-publisher>
+</tsante-mqtt>
+```
+-->
 <dom-module id="tsante-mqtt-publisher">
   <template>
     <style>
@@ -53,9 +69,12 @@
         });
       },
 
+      /**
+       * publish to the server
+       * @method _publish
+       */
       _publish: function() {
         if(this.parentElement.connected) {
-          console.log('publish');
           this.parentElement.client.send(this.topic, this.payload, this.qos, this.retained);
         }
       }
