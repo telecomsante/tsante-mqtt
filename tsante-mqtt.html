@@ -23,35 +23,26 @@ A MQTT component
         host: {
           type: String,
         },
-        /**
-         * Port to connect
-         * @type {Number}
-         */
-        port: {
-          type: Number,
-          value: 9883,
-        },
-        /**
-         * The topic to subscribe or to publish
-         * @type {String}
-         */
-        topic: {
-          type: String,
-        },
+
         /**
          * clientID
          * @type {String}
          */
         clientID: {
           type: String,
+          value: function() {
+            return Math.random().toString(36).replace(/[^a-z]+/g, '');
+          }
         },
+
         /**
          * username
          * @type {String}
          */
-        user: {
+        username: {
           type: String,
         },
+
         /**
          * password
          * @type {String}
@@ -59,24 +50,7 @@ A MQTT component
         password: {
           type: String,
         },
-        /**
-         * qos
-         *
-         * the value of the qos could be 0, 1, 2
-         * @type {Number}
-         */
-        qos: {
-          type: Number,
-          value: 0,
-        },
-        /**
-         * retain flag
-         * @type {Boolean}
-         */
-        retained: {
-          type: Boolean,
-          value: false,
-        },
+
         /**
          * timeout of the connection in seconds
          * @type {Number}
@@ -85,6 +59,18 @@ A MQTT component
           type: Number,
           value: 30,
         },
+
+        /**
+         * if true(default) the client and server persistent state
+         * is deleted on successful connect.
+         *
+         * @type {Boolean}
+         */
+        cleanSession: {
+          type: Boolean,
+          value: false,
+        },
+
         /**
          * sent by the server when the client disconnects abnormally.
          * @type {String}
@@ -94,39 +80,54 @@ A MQTT component
           value: function() { return {}; },
         },
 
-        _client: {
+        client: {
           type: Object,
+          notify: true,
         },
-        _connected: {
+
+        connected: {
           type: Boolean,
           value:false,
+          readOnly: true,
+          reflectToAttribute: true,
+          observer: '_connectedChanged'
         }
       },
-
-      observers:[
-        '_subscribe(host, port, topic)',
-      ],
 
       attached: function() {
-        console.log(this.host);
         if(this.host) {
-          this._client = new Paho.MQTT.Client(this.host,"clientID");
-          this._client.onConnectionLost = this._onConnectionLost.bind(this);
-          this._client.onMessageArrived = this._onMessageArrived.bind(this);
-          this._client.connect({
-            onSuccess: this.onConnect.bind(this),
-          })
+          this.client = new Paho.MQTT.Client(this.host, this.clientID);
+          this.client.onConnectionLost = this._onConnectionLost.bind(this);
+          this.client.onMessageArrived = this._onMessageArrived.bind(this);
+          this.client.onMessageDelivered = this._onMessageDelivered.bind(this);
+          const connectOption = {
+            onSuccess: this._onConnect.bind(this),
+            onFailure: this._onFail.bind(this),
+            timeout: this.timeout,
+            cleanSession: this.cleanSession,
+          };
+          if(this.username) { connectOption.userName = this.username; }
+          if(this.password) { connectOption.password = this.password; }
+
+          this.client.connect(connectOption);
         }
       },
 
-      onConnect: function() {
-        console.log("onConnect");
-        this._connected = true;
-        this._client.subscribe(this.topic);
+      _onConnect: function() {
+        this._setConnected(true);
+        console.log('connected');
+      },
+
+      _onFail: function() {
+        this._setConnected(false);
+        console.error('fail to connect');
+        throw new Error('fail to connect')
       },
 
       _subscribe: function(host, port, topic) {
         console.log(host, port, topic);
+      _connectedChanged: function() {
+        this.fire('tsante-mqtt-connect', { status: this.connected });
       },
 
       _onConnectionLost: function(msg) {
