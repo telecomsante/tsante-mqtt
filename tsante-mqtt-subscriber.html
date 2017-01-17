@@ -1,0 +1,32 @@
+<dom-module id="tsante-mqtt-subscriber">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'tsante-mqtt-subscriber',
+
+      properties: {
+        topic: {
+          type: String,
+          value: "#",
+        },
+      },
+
+      attached: function() {
+        parent.addEventListener('tsante-mqtt-connect', (evt) => {
+          if(evt.detail.status) { this._subscribe(); }
+        });
+      },
+
+      _subscribe: function() {
+        this.parentElement.client.subscribe(this.topic);
+      }
+    });
+  </script>
+</dom-module>

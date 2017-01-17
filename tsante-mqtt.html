@@ -124,8 +124,6 @@ A MQTT component
         throw new Error('fail to connect')
       },
 
-      _subscribe: function(host, port, topic) {
-        console.log(host, port, topic);
       _connectedChanged: function() {
         this.fire('tsante-mqtt-connect', { status: this.connected });
       },
