@@ -16,9 +16,37 @@
       .vertical-section-container {
         max-width:80%;
       }
+      .note {
+        max-width:80%;
+        margin:auto;
+        background: rgb(251, 243, 178);
+        border:1px solid black;
+        padding: 10px;
+        text-align: justify;
+      }
+      .note button {
+        font: inherit;
+        font-size: 16px;
+        padding: 10px 20px;
+        color: white;
+        background: dodgerblue;
+        border: none;
+        border-radius: 5px;
+        margin:auto;
+      }
     </style>
   </head>
   <body>
+    <div class="note">
+      <p>The demo uses the test mqtt server provided by mosquitto.org.</p>
+      <p>This server uses self-signed certificates, you must accept the
+        certificate to run the demo. To do so, go to
+        <a href="https://test.mosquitto.org:8081/" target="blank">https://test.mosquitto.org:8081/</a>
+        and accept the certificate. Then reload the demo page.</p>
+        <div style="text-align: center">
+          <button onclick="window.location.reload();">refresh</button>
+        </div>
+    </div>
     <div class="vertical-section-container centered">
       <h3>Subscribe demo</h3>
       <demo-snippet>
