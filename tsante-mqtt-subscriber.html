@@ -45,8 +45,11 @@ example :
       },
 
       attached: function() {
+        if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
+          console.error('tsqnte-mqtt-subscriber must have a tsante-mqtt parent');
+        }
         // when the parent is connected then subscribe to the topic
-        parent.addEventListener('tsante-mqtt-connect', (evt) => {
+        this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
           if(evt.detail.status) { this._subscribe(); }
         });
       },
@@ -128,7 +131,7 @@ example :
       /**
        * on successful unsubscribe send a `tsante-mqtt-subscribed` event
        * @method _onUnsubscribe
-       * @param  {Object} evt 
+       * @param  {Object} evt
        */
       _onUnsubscribe: function(evt) {
         this._setSubscribed(false);

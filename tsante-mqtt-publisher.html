@@ -64,7 +64,10 @@ example :
       },
 
       attached: function() {
-        parent.addEventListener('tsante-mqtt-connect', (evt) => {
+        if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
+          console.error('tsqnte-mqtt-publisher must have a tsante-mqtt parent');
+        }
+        this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
           if(evt.detail.status && this.payload) { this._publish(); }
         });
       },
