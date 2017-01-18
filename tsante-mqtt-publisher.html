@@ -1,0 +1,86 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`tsante-mqtt-publisher`
+
+A component to publish to a topic on a mqtt server. The component
+must be a children of `tsante-mqtt` component
+
+example :
+
+```
+<tsante-mqtt id="mqtt" host="ws://test.mosquitto.org:8080/" >
+  <tsante-mqtt-publisher topic="terminal/hello" payload="world"></tsante-mqtt-publisher>
+</tsante-mqtt>
+```
+-->
+<dom-module id="tsante-mqtt-publisher">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'tsante-mqtt-publisher',
+
+      properties: {
+        /**
+         * the topic to publish in
+         * @type {String}
+         */
+        topic: {
+          type: String,
+        },
+        /**
+         * qos
+         *
+         * the value of the qos could be 0, 1, 2
+         * @type {Number}
+         */
+        qos: {
+          type: Number,
+          value: 0,
+        },
+        /**
+         * retain flag
+         * @type {Boolean}
+         */
+        retained: {
+          type: Boolean,
+          value: false,
+        },
+        /**
+         * the payload to send
+         * @type {String}
+         */
+        payload: {
+          type: String,
+          observer: '_publish',
+        },
+      },
+
+      attached: function() {
+        if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
+          console.error('tsqnte-mqtt-publisher must have a tsante-mqtt parent');
+        }
+        this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
+          if(evt.detail.status && this.payload) { this._publish(); }
+        });
+      },
+
+      /**
+       * publish to the server
+       * @method _publish
+       */
+      _publish: function() {
+        if(this.parentElement.connected) {
+          this.parentElement.client.send(this.topic, this.payload, this.qos, this.retained);
+        }
+      }
+    });
+  </script>
+</dom-module>
