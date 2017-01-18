@@ -127,7 +127,7 @@ example :
       ],
 
       _initializeClient: function(host,clientID) {
-        if(this.connected && this.client) { this.disconnect(); } 
+        if(this.connected && this.client) { this.disconnect(); }
         this.client = new Paho.MQTT.Client(this.host, this.clientID);
         this.client.onConnectionLost = this._onConnectionLost.bind(this);
         this.client.onMessageArrived = this._onMessageArrived.bind(this);
@@ -239,6 +239,7 @@ example :
       disconnect: function() {
         try {
           this.client.disconnect();
+          this._setConnected(false);
         } catch(err) {
           this._onError(err.message);
         }
