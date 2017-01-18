@@ -38,7 +38,6 @@
           <script>
           const demo = document.querySelector('#demo');
           demo.$.mqtt.addEventListener("tsante-mqtt-received", evt => {
-            console.log(evt.detail);
             const div = document.createElement('div');
             let content = `<div class='topic'>${evt.detail.topic}</div>`;
             content+=  `<div class='payload'>${evt.detail.payload}</div>`;
@@ -66,11 +65,15 @@
           <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
           <tsante-mqtt id="mqtt2" host="ws://test.mosquitto.org:8080/" >
             <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
-            <tsante-mqtt-publisher topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
+            <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
           </tsante-mqtt>
           <div id="debug2"></div>
           <script>
           const demo2 = document.querySelector('#demo2');
+          // send q new messqge every 2 seconds
+          setInterval(() => {
+            demo2.$.publisher.payload = demo2.$.publisher.payload === 'polymer' ? 'world':'polymer';
+          }, 2000 );
           demo2.$.mqtt2.addEventListener("tsante-mqtt-delivered", evt => {
             const div = document.createElement('div');
             let content= `<div class='type'>delivered</div>`;
