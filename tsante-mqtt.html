@@ -134,12 +134,10 @@ example :
 
       _onConnect: function() {
         this._setConnected(true);
-        console.log('connected');
       },
 
       _onFail: function() {
         this._setConnected(false);
-        console.error('fail to connect');
         throw new Error('fail to connect')
       },
 
@@ -191,7 +189,6 @@ example :
        * @param  {Object}            msg the delivered message
        */
       _onMessageDelivered: function(msg) {
-        console.log("received : ", msg.destinationName, msg.payloadString );
         /**
          * fired when a message has been delivered
          *
