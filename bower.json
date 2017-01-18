@@ -1,7 +1,22 @@
 {
   "name": "tsante-mqtt",
+  "version":"1.0.0",
   "description": "A MQTT component",
+  "license": "LICENSE.md",
   "main": "tsante-mqtt.html",
+  "authors": [
+    "Telecom Sante <dev@telecomsante.com>"
+  ],
+  "keywords": [
+    "web-components",
+    "polymer",
+    "mqtt",
+    "network"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/telecomsante/tsante-mqtt.git"
+  },
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0"
   },
@@ -10,5 +25,6 @@
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
     "web-component-tester": "^4.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
-  }
+  },
+  "ignore": []
 }
