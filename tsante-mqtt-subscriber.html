@@ -54,6 +54,7 @@ example :
             this._subscribe();
           } else if(this.subscribed) {
             this._setSubscribed(false);
+            this.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
           }
         });
       },
