@@ -11,28 +11,14 @@ The component has no GUI.
 
 ## Quick example
 
-<!--
-```
-<custom-element-demo>
-  <template>
-    <script src="../webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="tsante-mqtt.html">
-    <next-code-block></next-code-block>
-  </template>
-</custom-element-demo>
-```
--->
+> Nota : the demo doesn't work on webcomponents.org, due to permission access to
+the localstorage, to see a demo please consult the demo link below.
+
 ```html
 <tsante-mqtt host="ws://test.mosquitto.org:8080/" >
   <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
   <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
 </tsante-mqtt>
-<script>
-const publisher = document.querySelector('#publisher')
-setInterval(() => {
-  publisher.payload = publisher.payload === 'polymer' ? 'world' : 'polymer';
-}, 1000)
-</script>
 ```
 
 The component is licensed under the [ISC License](LICENSE.md)
