@@ -31,7 +31,7 @@
           .payload { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
           </style>
           <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
-          <tsante-mqtt id="mqtt" host="ws://test.mosquitto.org:8080/" >
+          <tsante-mqtt id="mqtt" host="wss://test.mosquitto.org:8081/" >
             <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
           </tsante-mqtt>
           <div id="debug"></div>
@@ -63,7 +63,7 @@
           .payload { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
           </style>
           <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
-          <tsante-mqtt id="mqtt2" host="ws://test.mosquitto.org:8080/" >
+          <tsante-mqtt id="mqtt2" host="wss://test.mosquitto.org:8081/" >
             <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
             <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
           </tsante-mqtt>
