@@ -122,14 +122,17 @@ example :
         }
       },
 
-      attached: function() {
-        if(this.host) {
-          this.client = new Paho.MQTT.Client(this.host, this.clientID);
-          this.client.onConnectionLost = this._onConnectionLost.bind(this);
-          this.client.onMessageArrived = this._onMessageArrived.bind(this);
-          this.client.onMessageDelivered = this._onMessageDelivered.bind(this);
-          this.connect();
-        }
+      observers: [
+        '_initializeClient(host,clientID)',
+      ],
+
+      _initializeClient: function(host,clientID) {
+        if(this.connected && this.client) { this.disconnect(); } 
+        this.client = new Paho.MQTT.Client(this.host, this.clientID);
+        this.client.onConnectionLost = this._onConnectionLost.bind(this);
+        this.client.onMessageArrived = this._onMessageArrived.bind(this);
+        this.client.onMessageDelivered = this._onMessageDelivered.bind(this);
+        this.connect();
       },
 
       _onConnect: function() {
