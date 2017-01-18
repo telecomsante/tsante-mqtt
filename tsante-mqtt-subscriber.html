@@ -46,7 +46,7 @@ example :
 
       attached: function() {
         if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
-          console.error('tsqnte-mqtt-subscriber must have a tsante-mqtt parent');
+          console.error('tsante-mqtt-subscriber must have a tsante-mqtt parent');
         }
         // when the parent is connected then subscribe to the topic
         this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
