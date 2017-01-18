@@ -50,7 +50,11 @@ example :
         }
         // when the parent is connected then subscribe to the topic
         this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
-          if(evt.detail.status) { this._subscribe(); }
+          if(evt.detail.status) {
+            this._subscribe();
+          } else if(this.subscribed) {
+            this._setSubscribed(false);
+          }
         });
       },
 
