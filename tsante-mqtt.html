@@ -75,7 +75,17 @@ example :
          */
         timeout: {
           type: Number,
-          value: 30,
+          value: 10,
+        },
+
+        /**
+         * retry connect after a period
+         * the time is in seconds
+         * @type {Number}
+         */
+        retry: {
+          type: Number,
+          value: 0,
         },
 
         /**
@@ -139,9 +149,23 @@ example :
         this._setConnected(true);
       },
 
+      /**
+       * sent when the connection fails
+       * @event tsante-mqtt-connect-error
+       * @param  {String} message message of the error
+       * @param  {Boolean} status status of the connection
+       */
       _onFail: function() {
         this._setConnected(false);
-        throw new Error('fail to connect')
+        this.fire('tsante-mqtt-connect-error', {
+          status: this.connected,
+          message: 'fail to connect',
+         });
+         this._retry();
+      },
+
+      _retry: function() {
+        if(this.retry) { setTimeout(this.connect.bind(this), this.retry*1000); }
       },
 
       /**
@@ -162,6 +186,7 @@ example :
 
       _onConnectionLost: function(msg) {
         this._setConnected(false);
+        this._retry();
       },
 
       /**
@@ -246,7 +271,7 @@ example :
       },
 
       /**
-       * fired when an error occurs zhile connect or disconnect
+       * fired when an error occurs while connect or disconnect
        *
        * example of error :
        *  - "AMQJS0011E Invalid state not connecting or connected."

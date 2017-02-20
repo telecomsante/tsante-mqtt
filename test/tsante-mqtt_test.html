@@ -165,6 +165,44 @@
           });
           element.host = 'wss://test.mosquitto.org:8081/';
         });
+
+        test('test connection should not retry by default', (done) => {
+          this.timeout(0);
+          const element = fixture('basic');
+          let count = 0;
+          let start;
+          element.addEventListener('tsante-mqtt-connect-error', (evt) => {
+            expect(evt.detail.message).to.be.equal('fail to connect');
+            expect(evt.detail.status).to.be.false;
+            if(!count++) {
+              start = Math.floor(Date.now() / 1000);
+              setTimeout(done, 7000);
+            } else {
+              done(false);
+            }
+          });
+          element.host = 'wss://127.0.0.1:8081/';
+        });
+
+        test('test connection retry', (done) => {
+          this.timeout(0);
+          const element = fixture('basic');
+          let count = 0;
+          let start;
+          element.addEventListener('tsante-mqtt-connect-error', (evt) => {
+            expect(evt.detail.message).to.be.equal('fail to connect');
+            expect(evt.detail.status).to.be.false;
+            if(!count++) {
+              start = Math.floor(Date.now() / 1000);
+            } else {
+              const end = Math.floor(Date.now() / 1000);
+              expect(end - start).to.be.at.least(5);
+              done();
+            }
+          });
+          element.retry = 5
+          element.host = 'wss://127.0.0.1:8081/';
+        });
       });
     </script>
   </body>

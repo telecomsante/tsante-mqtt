@@ -1,4 +1,9 @@
 
+# v1.1.0-pre
+
+  - tsante-mqtt : send a `tsante-mqtt-connect-error` event on connection fail
+  - tsante-mqtt : retry connection when `retry` is set
+
 # v1.0.1
 
   - tsante-mqtt : reinitialize client when modifying host or clientID
