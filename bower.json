@@ -26,5 +26,7 @@
     "web-component-tester": "^5.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   },
-  "ignore": []
+  "ignore": [
+    "package.json"
+  ]
 }
