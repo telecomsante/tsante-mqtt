@@ -1,5 +1,5 @@
 
-# v1.1.0-pre
+# v1.1.0
 
   - tsante-mqtt : send a `tsante-mqtt-connect-error` event on connection fail
   - tsante-mqtt : retry connection when `retry` is set
