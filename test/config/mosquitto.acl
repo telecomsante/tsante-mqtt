@@ -1,0 +1,10 @@
+topic read terminal/#
+topic write req/terminal/#
+
+user admin
+topic readwrite terminal/#
+topic readwrite req/terminal/#
+
+user sound
+topic readwrite terminal/sound/#
+topic write req/terminal/#

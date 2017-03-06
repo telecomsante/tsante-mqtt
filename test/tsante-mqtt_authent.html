@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>tsante-mqtt test</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../tsante-mqtt.html">
+  </head>
+  <body>
+    <p>To test authentication, please run the docker-compose provided</p>
+    <test-fixture id="auth">
+      <template>
+        <tsante-mqtt>
+          <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+        </tsante-mqtt>
+      </template>
+    </test-fixture>
+    <div id="mocha"></div>
+    <script>
+    describe('tsante-mqtt authentication', function() {
+      afterEach( function() {
+        try {
+          document.getElementById('auth').restore();
+        } catch(err) {
+          console.warn(err);
+        }
+      });
+
+      it('the component is not connected', () => {
+        const element = fixture('auth');
+        const subscriber = element.querySelector('tsante-mqtt-subscriber');
+        expect(element.connected).to.be.false;
+        expect(subscriber.subscribed).to.be.false;
+      });
+
+      it('connect as admin', (done) => {
+        const element = fixture('auth');
+        element.username = 'admin';
+        element.password = 'admin';
+        element.host = 'ws://localhost:9883/';
+        function check(evt) {
+          element.removeEventListener('tsante-mqtt-connect',check);
+          expect(evt.detail.status).to.be.true;
+          done();
+        };
+        element.addEventListener('tsante-mqtt-connect', check, { once:true } );
+      });
+
+      it('write as admin', (done) => {
+        const element = fixture('auth');
+        const publisher = element.querySelector('tsante-mqtt-publisher');
+        element.username = 'admin';
+        element.password = 'admin';
+        element.host = 'ws://localhost:9883/';
+        function check(evt) {
+          element.removeEventListener('tsante-mqtt-connect',check);
+          expect(evt.detail.status).to.be.true;
+          publisher.payload = 'world';
+        };
+        element.addEventListener('tsante-mqtt-connect', check, { once:true } );
+        element.addEventListener('tsante-mqtt-received', (evt) => {
+          expect(evt.detail.topic).to.be.equal('terminal/hello');
+          expect(evt.detail.payload).to.be.equal('world');
+          done();
+        }, { once:true });
+      });
+
+      it('write as anonymous', (done) => {
+        const element = fixture('auth');
+        const publisher = element.querySelector('tsante-mqtt-publisher');
+        function check(evt) {
+          element.removeEventListener('tsante-mqtt-connect',check);
+          expect(evt.detail.status).to.be.true;
+          publisher.payload = 'world';
+        };
+        element.addEventListener('tsante-mqtt-connect', check, { once:true } );
+        element.addEventListener('tsante-mqtt-connect-error', (evt) => {
+          done(false);
+        });
+        element.addEventListener('tsante-mqtt-received', (evt) => {
+          done(false);
+        });
+        element.host = 'ws://localhost:9883/';
+        setTimeout(done, 7000);
+      });
+
+    });
+    </script>
+  </body>
+</html>
