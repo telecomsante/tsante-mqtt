@@ -9,6 +9,14 @@ The component is based on the [Paho javascript client library](https://eclipse.o
 
 The component has no GUI.
 
+The component is provided in ES6
+
+    <link rel="import" href="bower_components/tsante-mqtt.html">
+
+or for older browser in ES5
+
+    <link rel="import" href="bower_components/tsante-mqtt.es5.html">
+
 ## Quick example
 
 > Nota : the demo doesn't work on webcomponents.org, due to permission access to
