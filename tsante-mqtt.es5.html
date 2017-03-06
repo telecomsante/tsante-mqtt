@@ -1,0 +1,24 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="./tsante-mqtt-subscriber.es5.html">
+<link rel="import" href="./tsante-mqtt-publisher.es5.html">
+<link rel="import" href="./mqttws31.html">
+
+<!--
+`tsante-mqtt`
+A MQTT component
+
+example :
+
+```
+<tsante-mqtt host="ws://test.mosquitto.org:8080/" >
+  <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
+  <tsante-mqtt-publisher topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
+</tsante-mqtt>
+```
+
+@demo demo/index.html
+-->
+
+<dom-module id="tsante-mqtt">
+  <script src="tsante-mqtt.es5.js"></script>
+</dom-module>
