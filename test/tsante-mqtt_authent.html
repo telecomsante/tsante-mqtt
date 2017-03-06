@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>tsante-mqtt test</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../tsante-mqtt.html">
+  </head>
+  <body>
+    <test-fixture id="basic">
+      <template>
+        <tsante-mqtt>
+          <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+        </tsante-mqtt>
+      </template>
+    </test-fixture>
+    <div id="mocha"></div>
+    <script>
+    suite('tsante-mqtt', function() {
+      
+    });
+    </script>
+  </body>
+</html>
