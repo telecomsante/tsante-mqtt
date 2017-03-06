@@ -136,6 +136,10 @@ example :
         '_initializeClient(host,clientID)',
       ],
 
+      attached() {
+        this.connect();
+      },
+
       _initializeClient: function(host,clientID) {
         if(this.connected && this.client) { this.disconnect(); }
         this.client = new Paho.MQTT.Client(this.host, this.clientID);
@@ -240,15 +244,15 @@ example :
        *
        * @method connect
        */
-      connect: function() {
+      connect: function(username, password) {
         const connectOption = {
           onSuccess: this._onConnect.bind(this),
           onFailure: this._onFail.bind(this),
           timeout: this.timeout,
           cleanSession: this.cleanSession,
         };
-        if(this.username) { connectOption.userName = this.username; }
-        if(this.password) { connectOption.password = this.password; }
+        connectOption.userName = this.username || username || "";
+        connectOption.password = this.password || password || "";
 
         try {
           this.client.connect(connectOption);
