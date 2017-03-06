@@ -1,8 +1,7 @@
 {
   "name": "tsante-mqtt",
-  "version": "1.1.0-pre",
+  "version": "1.1.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build-es5":"babel tsante-mqtt-subscriber.js -o tsante-mqtt-subscriber.es5.js && babel tsante-mqtt-publisher.js -o tsante-mqtt-publisher.es5.js && babel tsante-mqtt.js -o tsante-mqtt.es5.js"
   },
   "repository": {
