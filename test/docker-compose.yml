@@ -1,0 +1,21 @@
+version: "2"
+
+volumes:
+  mosquittoDB:
+
+services:
+  mqtt:
+    image: jllopis/mosquitto:v1.4.10
+    container_name: mosquitto-test
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "5"
+    volumes:
+      - ./config:/etc/mosquitto
+      - mosquittoDB:/var/lib/mosquitto
+    ports:
+      - 1883:1883
+      - 9883:9883

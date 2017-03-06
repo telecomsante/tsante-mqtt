@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>tsante-mqtt demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents.min.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../tsante-mqtt.es5.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+      .vertical-section-container {
+        max-width:80%;
+      }
+      .note {
+        max-width:80%;
+        margin:auto;
+        background: rgb(251, 243, 178);
+        border:1px solid black;
+        padding: 10px;
+        text-align: justify;
+      }
+      .note button {
+        font: inherit;
+        font-size: 16px;
+        padding: 10px 20px;
+        color: white;
+        background: dodgerblue;
+        border: none;
+        border-radius: 5px;
+        margin:auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="note">
+      <p>The demo uses the test mqtt server provided by mosquitto.org.</p>
+      <p>This server uses self-signed certificates, you must accept the
+        certificate to run the demo. To do so, go to
+        <a href="https://test.mosquitto.org:8081/" target="blank">https://test.mosquitto.org:8081/</a>
+        and accept the certificate. Then reload the demo page.</p>
+        <div style="text-align: center">
+          <button onclick="window.location.reload();">refresh</button>
+        </div>
+    </div>
+    <div class="vertical-section-container centered">
+      <h3>Subscribe demo</h3>
+      <demo-snippet>
+        <template is="dom-bind" id="demo">
+          <style>
+          #debug { max-height: 300px; overflow-y: auto;}
+          #debug > div { display: flex; border: 1px solid lightgray; height: 25px; align-items: center; }
+          #debug > div:nth-child(even) { background: lightgray; }
+          .topic { width: 150px; padding:0px 10px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}
+          .payload { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+          </style>
+          <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
+          <tsante-mqtt id="mqtt" host="wss://test.mosquitto.org:8081/" >
+            <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+          </tsante-mqtt>
+          <div id="debug"></div>
+          <script>
+          var demo = document.querySelector('#demo');
+          demo.$.mqtt.addEventListener("tsante-mqtt-received", function(evt) {
+            var div = document.createElement('div');
+            var content = '<div class="topic">'+evt.detail.topic+'</div>';
+            content+=  '<div class="payload">'+evt.detail.payload+'</div>';
+            div.innerHTML = content;
+            if(demo.$.debug.firstChild) {
+              demo.$.debug.insertBefore(div, demo.$.debug.firstChild);
+            } else {
+              demo.$.debug.appendChild(div);
+            }
+          })
+          </script>
+        </template>
+      </demo-snippet>
+
+      <h3>Publish demo</h3>
+      <demo-snippet>
+        <template is="dom-bind" id="demo2">
+          <style>
+          #debug2 { max-height: 300px; overflow-y: auto;}
+          #debug2 > div { display: flex; border: 1px solid lightgray; height: 25px; align-items: center; }
+          #debug2 > div:nth-child(even) { background: lightgray; }
+          .topic { width: 150px; padding:0px 10px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}
+          .payload { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+          </style>
+          <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
+          <tsante-mqtt id="mqtt2" host="wss://test.mosquitto.org:8081/" >
+            <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
+            <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
+          </tsante-mqtt>
+          <div id="debug2"></div>
+          <script>
+          var demo2 = document.querySelector('#demo2');
+          // send q new messqge every 2 seconds
+          setInterval(() => {
+            demo2.$.publisher.payload = demo2.$.publisher.payload === 'polymer' ? 'world':'polymer';
+          }, 2000 );
+          demo2.$.mqtt2.addEventListener("tsante-mqtt-delivered", function(evt) {
+            var div = document.createElement('div');
+            var content= '<div class="type">delivered</div>';
+            content+= '<div class="topic">'+evt.detail.topic+'</div>';
+            content+= '<div class="payload">'+evt.detail.payload+'</div>';
+            div.innerHTML = content;
+            if(demo2.$.debug2.firstChild) {
+              demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild);
+            } else {
+              demo2.$.debug2.appendChild(div);
+            }
+          });
+          demo2.$.mqtt2.addEventListener("tsante-mqtt-received", function(evt) {
+            var div = document.createElement('div');
+            var content= "<div class='type'>received</div>";
+            content+= "<div class='topic'>"+evt.detail.topic+"</div>";
+            content+= "<div class='payload'>"+evt.detail.payload+"</div>";
+            div.innerHTML = content;
+            if(demo2.$.debug2.firstChild) {
+              demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild);
+            } else {
+              demo2.$.debug2.appendChild(div);
+            }
+          })
+          </script>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>
