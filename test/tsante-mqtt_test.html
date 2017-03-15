@@ -144,7 +144,7 @@
           element.host = 'ws://test.mosquitto.org:8080/';
         });
 
-        it('publisher should automatically on connect', (done) => {
+        it('publisher should automatically publish on connect', (done) => {
           const element = fixture('basic');
           const subscriber = element.querySelector('tsante-mqtt-subscriber');
           const publisher = element.querySelector('tsante-mqtt-publisher');
@@ -168,6 +168,26 @@
             expect(evt.detail.topic).to.be.equal('terminal/hello');
             done();
           });
+          element.host = 'ws://test.mosquitto.org:8080/';
+        });
+
+        it('test issue #4 regression', (done) => {
+          const element = fixture('basic');
+          const subscriber = element.querySelector('tsante-mqtt-subscriber');
+          const publisher = element.querySelector('tsante-mqtt-publisher');
+          const listener = (evt) => {
+            element.removeEventListener('tsante-mqtt-delivered', listener);
+            expect(evt.detail.payload).to.be.equal('45');
+            expect(evt.detail.topic).to.be.equal('terminal/hello');
+            element.addEventListener('tsante-mqtt-delivered', (evt) => {
+              expect(evt.detail.payload).to.be.equal('world');
+              expect(evt.detail.topic).to.be.equal('terminal/hello');
+              done();
+            });
+            publisher.payload = 'world';
+          };
+          element.addEventListener('tsante-mqtt-delivered', listener);
+          publisher.payload = '45';
           element.host = 'ws://test.mosquitto.org:8080/';
         });
 

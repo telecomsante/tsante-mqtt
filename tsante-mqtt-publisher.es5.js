@@ -35,10 +35,11 @@ Polymer({
      */
     payload: {
       type: String,
-      value: "",
-      observer: 'publish'
+      value: ""
     }
   },
+
+  observers: ['publish(payload)'],
 
   attached: function attached() {
     var _this = this;
@@ -48,7 +49,7 @@ Polymer({
     }
     this.parentElement.addEventListener('tsante-mqtt-connect', function (evt) {
       if (evt.detail.status && _this.payload) {
-        _this._publish();
+        _this.publish();
       }
     });
   },
