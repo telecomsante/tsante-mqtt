@@ -33,10 +33,13 @@ Polymer({
      */
     payload: {
       type: String,
-      value: "",
-      observer: 'publish',
+      value: ""
     },
   },
+
+  observers: [
+    'publish(payload)'
+  ],
 
   attached: function() {
     if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
