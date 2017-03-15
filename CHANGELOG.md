@@ -1,8 +1,9 @@
 
-# develop
+# v1.1.1-pre
 
   - fix #5 : enhance connection
-
+  - fix #4
+  
 # v1.1.0
 
   - tsante-mqtt : send a `tsante-mqtt-connect-error` event on connection fail
