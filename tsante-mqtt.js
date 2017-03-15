@@ -110,6 +110,7 @@ Polymer({
 
   observers: [
     '_initializeClient(host,clientID)',
+    'connect(username, password)',
   ],
 
   attached() {
@@ -228,24 +229,26 @@ Polymer({
    */
   connect: function(username, password) {
     if(!this.client) return;
-    const connectOption = {
-      onSuccess: this._onConnect.bind(this),
-      onFailure: this._onFail.bind(this),
-      timeout: this.timeout,
-      cleanSession: this.cleanSession,
-    };
-    if(this.username || username) {
-      connectOption.userName = this.username || username;
-    }
-    if(this.password || password) {
-      connectOption.password = this.password || password;
-    }
+    this.debounce('connect',() => {
+      const connectOption = {
+        onSuccess: this._onConnect.bind(this),
+        onFailure: this._onFail.bind(this),
+        timeout: this.timeout,
+        cleanSession: this.cleanSession,
+      };
+      if(this.username || username) {
+        connectOption.userName = this.username || username;
+      }
+      if(this.password || password) {
+        connectOption.password = this.password || password;
+      }
 
-    try {
-      this.client.connect(connectOption);
-    } catch(err) {
-      this._onError(err.message);
-    }
+      try {
+        this.client.connect(connectOption);
+      } catch(err) {
+        this._onError(err.message);
+      }
+    }, 100);
   },
 
   /**
