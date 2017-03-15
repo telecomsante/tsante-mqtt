@@ -43,7 +43,7 @@ Polymer({
       console.error('tsante-mqtt-publisher must have a tsante-mqtt parent');
     }
     this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
-      if(evt.detail.status && this.payload) { this._publish(); }
+      if(evt.detail.status && this.payload) { this.publish(); }
     });
   },
 
