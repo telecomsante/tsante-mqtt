@@ -33,12 +33,12 @@ Polymer({
      */
     payload: {
       type: String,
-      value: ""
+      value: "",
     },
   },
 
   observers: [
-    'publish(payload)'
+    'publish(payload)',
   ],
 
   attached: function() {
