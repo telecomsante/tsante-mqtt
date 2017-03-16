@@ -10,7 +10,7 @@
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
 
-  <link rel="import" href="../tsante-mqtt.html">
+  <link rel="import" href="../tsante-mqtt.es5.html">
 </head>
 
 <body>
@@ -24,12 +24,12 @@
   </test-fixture>
   <div id="mocha"></div>
   <script>
-    describe('tsante-mqtt authentication', function() {
+    describe('tsante-mqtt authentication es5 version', function() {
       afterEach(function() {
         try {
           document.getElementById('auth').restore();
         } catch (err) {
-          console.warn(err);
+          console.warn('can\'t restore');
         }
       });
 
@@ -52,9 +52,22 @@
           expect(evt.detail.message).to.be.equal("fail to connect");
           done();
         };
-        element.addEventListener('tsante-mqtt-connect-error', check, {
-          once: true
-        });
+        element.addEventListener('tsante-mqtt-connect-error', check);
+      });
+
+      it('bad login', (done) => {
+        const element = fixture('auth');
+        element.username = 'test';
+        element.password = 'admin';
+        element.host = 'ws://localhost:9883/';
+
+        function check(evt) {
+          element.removeEventListener('tsante-mqtt-connect-error', check);
+          expect(evt.detail.status).to.be.false;
+          expect(evt.detail.message).to.be.equal("fail to connect");
+          done();
+        };
+        element.addEventListener('tsante-mqtt-connect-error', check);
       });
 
       it('connect as admin', (done) => {

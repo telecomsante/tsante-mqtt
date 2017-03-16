@@ -10,7 +10,7 @@
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
 
-  <link rel="import" href="../tsante-mqtt.html">
+  <link rel="import" href="../tsante-mqtt.es5.html">
 </head>
 
 <body>
@@ -24,18 +24,18 @@
   </test-fixture>
   <div id="mocha"></div>
   <script>
-    describe('tsante-mqtt', function() {
+    describe('tsante-mqtt es5 version', function() {
 
       afterEach(function() {
         try {
           document.getElementById('basic').restore();
         } catch (err) {
-          console.warn(err);
+          console.warn('can\'t restore');
         }
       });
 
       it('instantiating the element works', function() {
-        var element = fixture('basic');
+        const element = fixture('basic');
         assert.equal(element.is, 'tsante-mqtt');
       });
 
@@ -48,12 +48,14 @@
 
       it('error when connecting to ws://:8080/', (done) => {
         const element = fixture('basic');
-        element.addEventListener('tsante-mqtt-error', (evt) => {
+
+        function check(evt) {
+          element.removeEventListener('tsante-mqtt-error', check);
           expect(evt.detail).to.be.a.string;
           done();
-        }, {
-          once: true
-        });
+        }
+
+        element.addEventListener('tsante-mqtt-error', check);
         element.host = 'ws://:8080/';
       });
 

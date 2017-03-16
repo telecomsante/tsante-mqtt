@@ -1,28 +1,86 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
-    <style>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <style>
+    body {
+      font-family: Roboto;
+    }
+
     #subsuites {
       width: 1024px;
     }
+
     #mocha {
-      z-index:1;
+      z-index: 1;
     }
-    </style>
-  </head>
-  <body>
-    <script>
-      // Load and run all tests (.html, .js):
-      WCT.loadSuites([
-        'tsante-mqtt_test.html',
-        'tsante-mqtt_test.html?dom=shadow',
-        'tsante-mqtt_authent.html',
-        'tsante-mqtt_authent.html?dom=shadow'
-      ]);
-    </script>
-  </body>
+
+    #note {
+      width: 500px;
+      padding: 60px 0px;
+    }
+
+    #note>div {
+      max-width: 80%;
+      margin: auto;
+      margin-bottom: 20px;
+    }
+
+    .note {
+      background: rgb(251, 243, 178);
+      border: 1px solid black;
+      padding: 10px;
+      text-align: justify;
+    }
+
+    .note button {
+      font: inherit;
+      font-size: 16px;
+      padding: 10px 20px;
+      color: white;
+      background: dodgerblue;
+      border: none;
+      border-radius: 5px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="note">
+    <div class="note">
+      <p>The demo uses the test mqtt server provided by mosquitto.org.</p>
+      <p>This server uses self-signed certificates, you must accept the certificate to run the demo. To do so, go to
+        <a href="https://test.mosquitto.org:8081/" target="blank">https://test.mosquitto.org:8081/</a> and accept the certificate. Then reload the demo page.</p>
+      <div style="text-align: center">
+        <button onclick="window.location.reload();">refresh</button>
+      </div>
+    </div>
+    <div class="note">
+      <p>To test authentication, please run the docker-compose provided in the test directory</p>
+      <pre><code>docker-compose -f test/docker-compose.yml up -d</code></pre>
+    </div>
+    <div>
+      The tests are executed twice, in shady and shadow DOM
+    </div>
+  </div>
+  <script>
+    // Load and run all tests (.html, .js):
+    WCT.loadSuites([
+      'tsante-mqtt_test.html',
+      'tsante-mqtt_authent.html',
+      'tsante-mqtt_test.html?dom=shadow',
+      'tsante-mqtt_authent.html?dom=shadow',
+      'tsante-mqtt_test-es5.html',
+      'tsante-mqtt_authent-es5.html',
+      'tsante-mqtt_test-es5.html?dom=shadow',
+      'tsante-mqtt_authent-es5.html?dom=shadow',
+    ]);
+  </script>
+</body>
+
 </html>
