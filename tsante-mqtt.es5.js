@@ -112,7 +112,7 @@ Polymer({
     }
   },
 
-  observers: ['_initializeClient(host,clientID)'],
+  observers: ['_initializeClient(host,clientID)', 'connect(username, password)'],
 
   attached: function attached() {
     this.connect();
@@ -233,25 +233,29 @@ Polymer({
    * @param  {String} password the password to use
    */
   connect: function connect(username, password) {
-    if (!this.client) return;
-    var connectOption = {
-      onSuccess: this._onConnect.bind(this),
-      onFailure: this._onFail.bind(this),
-      timeout: this.timeout,
-      cleanSession: this.cleanSession
-    };
-    if (this.username || username) {
-      connectOption.userName = this.username || username;
-    }
-    if (this.password || password) {
-      connectOption.password = this.password || password;
-    }
+    var _this = this;
 
-    try {
-      this.client.connect(connectOption);
-    } catch (err) {
-      this._onError(err.message);
-    }
+    if (!this.client) return;
+    this.debounce('connect', function () {
+      var connectOption = {
+        onSuccess: _this._onConnect.bind(_this),
+        onFailure: _this._onFail.bind(_this),
+        timeout: _this.timeout,
+        cleanSession: _this.cleanSession
+      };
+      if (_this.username || username) {
+        connectOption.userName = _this.username || username;
+      }
+      if (_this.password || password) {
+        connectOption.password = _this.password || password;
+      }
+
+      try {
+        _this.client.connect(connectOption);
+      } catch (err) {
+        _this._onError(err.message);
+      }
+    }, 100);
   },
 
   /**

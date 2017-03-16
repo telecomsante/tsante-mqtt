@@ -1,7 +1,8 @@
 
-# develop
+# v1.1.1
 
   - fix #5 : enhance connection
+  - fix #4
 
 # v1.1.0
 
