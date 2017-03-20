@@ -1,3 +1,6 @@
+# v1.2.0
+
+  - fix #7 : cannot publish the same payload when changing the topic
 
 # v1.1.1
 
