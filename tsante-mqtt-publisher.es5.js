@@ -6,10 +6,14 @@ Polymer({
   properties: {
     /**
      * the topic to publish in
+     *
+     * when the topic is changed, the payload is changed to null.
+     * 
      * @type {String}
      */
     topic: {
-      type: String
+      type: String,
+      observer: '_topicChanged'
     },
     /**
      * qos
@@ -35,7 +39,7 @@ Polymer({
      */
     payload: {
       type: String,
-      value: ""
+      value: null
     }
   },
 
@@ -54,6 +58,10 @@ Polymer({
     });
   },
 
+  _topicChanged: function _topicChanged(newValue) {
+    this.payload = null;
+  },
+
   /**
    * publish to the server
    *
@@ -65,6 +73,7 @@ Polymer({
   publish: function publish(payload, qos, retained) {
     if (this.parentElement.connected) {
       payload = typeof payload === "string" ? payload : this.payload;
+      if (payload === null) return;
       qos = !qos || isNaN(qos) ? this.qos : qos;
       retained = typeof retained === 'boolean' ? retained : this.retained;
       this.parentElement.client.send(this.topic, payload, qos, retained);
