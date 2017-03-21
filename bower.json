@@ -28,6 +28,6 @@
   },
   "ignore": [
     "package.json",
-    "CHANGELOG.md",
+    "CHANGELOG.md"
   ]
 }
