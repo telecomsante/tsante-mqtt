@@ -1,19 +1,112 @@
-<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../polymer/polymer-element.html">
 
-<!--
-`tsante-mqtt-publisher`
-
-A component to publish to a topic on a mqtt server. The component
-must be a children of `tsante-mqtt` component
-
-example :
-
-```
-<tsante-mqtt id="mqtt" host="ws://test.mosquitto.org:8080/" >
-  <tsante-mqtt-publisher topic="terminal/hello" payload="world"></tsante-mqtt-publisher>
-</tsante-mqtt>
-```
--->
 <dom-module id="tsante-mqtt-publisher">
-  <script src="tsante-mqtt-publisher.js"></script>
+  <script>
+    /**
+     * `tsante-mqtt-publisher`
+     * 
+     * A component to publish to a topic on a mqtt server. The component
+     * must be a children of `tsante-mqtt` component
+     * 
+     * example :
+     * 
+     * ```
+     * <tsante-mqtt id="mqtt" host="ws://test.mosquitto.org:8080/" >
+     *   <tsante-mqtt-publisher topic="terminal/hello" payload="world"></tsante-mqtt-publisher>
+     * </tsante-mqtt>
+     * ```
+     * 
+     * @customElement
+     * @Polymer
+     * @extends {Polymer.Element}
+     */
+    class TsanteMqttPublisher extends Polymer.Element {
+      static get is() {
+        return 'tsante-mqtt-publisher'
+      }
+
+      static get properties() {
+        return {
+          /**
+           * the topic to publish in
+           *
+           * when the topic is changed, the payload is changed to null.
+           * 
+           * @type {String}
+           */
+          topic: {
+            type: String,
+            observer: '_topicChanged',
+          },
+          /**
+           * qos
+           *
+           * the value of the qos could be 0, 1, 2
+           * @type {Number}
+           */
+          qos: {
+            type: Number,
+            value: 0,
+          },
+          /**
+           * retain flag
+           * @type {Boolean}
+           */
+          retained: {
+            type: Boolean,
+            value: false,
+          },
+
+          /**
+           * the payload to send
+           * @type {String}
+           */
+          payload: {
+            type: String,
+            value: null,
+          },
+        }
+      }
+
+      static get observers() {
+        return [ 'publish(payload)']
+      }
+
+      connectedCallback() {
+        super.connectedCallback()
+        if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
+          console.error('tsante-mqtt-publisher must have a tsante-mqtt parent');
+        }
+        this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
+          if (evt.detail.status && this.payload) {
+            this.publish();
+          }
+        });
+      }
+
+      _topicChanged(newValue) {
+        this.payload = null
+      }
+
+      /**
+       * publish to the server
+       *
+       * @method publish
+       * @param  {String} payload the value to publish
+       * @param  {Number} qos the qos of the message (0,1,2) by default this.qos
+       * @param  {Boolean} retained flag indicates that the server must or not keep the value by default this.retained
+       */
+      publish(payload, qos, retained) {
+        if (this.parentElement.connected) {
+          payload = typeof payload === "string" ? payload : this.payload;
+          if (payload === null) return;
+          qos = (!qos || isNaN(qos)) ? this.qos : qos;
+          retained = typeof retained === 'boolean' ? retained : this.retained;
+          this.parentElement.client.send(this.topic, payload, qos, retained);
+        }
+      }
+    }
+
+    window.customElements.define(TsanteMqttPublisher.is, TsanteMqttPublisher)
+  </script>
 </dom-module>
