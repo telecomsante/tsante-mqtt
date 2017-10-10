@@ -24,6 +24,8 @@
   </test-fixture>
   <div id="mocha"></div>
   <script>
+    const HOSTURL = 'ws://localhost:9883/'
+
     describe('tsante-mqtt', function() {
 
       afterEach(function() {
@@ -36,7 +38,7 @@
 
       it('instantiating the element works', function() {
         var element = fixture('basic');
-        assert.equal(element.is, 'tsante-mqtt');
+        assert.equal(element.constructor.name, 'TsanteMqtt');
       });
 
       it('the component is not connected', () => {
@@ -57,7 +59,7 @@
         element.host = 'ws://:8080/';
       });
 
-      it('connect to ws://test.mosquitto.org:8080/', (done) => {
+      it(`connect to ${HOSTURL}`, (done) => {
         const element = fixture('basic');
         element.addEventListener('tsante-mqtt-connect', (evt) => {
           expect(evt.detail.status).to.be.true;
@@ -65,7 +67,7 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL
       });
 
       it('if already connected, on connect the component should throw an error', (done) => {
@@ -85,7 +87,7 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
       it('disconnect', (done) => {
@@ -106,7 +108,7 @@
           }
         }
         element.addEventListener('tsante-mqtt-connect', check);
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
       it('if already disconnected, on disconnect the component should throw an error', (done) => {
@@ -131,7 +133,7 @@
         }
         element.addEventListener('tsante-mqtt-connect', check);
         element.addEventListener('tsante-mqtt-error', onError);
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
       it('subscriber should automatically subscribe on connect', (done) => {
@@ -145,7 +147,7 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
       it('subscriber should automatically be unsubscribed on disconnect', (done) => {
@@ -164,7 +166,7 @@
             done();
           }
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
       it('publisher should automatically publish on connect', (done) => {
@@ -177,7 +179,7 @@
           expect(evt.detail.topic).to.be.equal('terminal/hello');
           done();
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
       it('subscriber should receive the published message', (done) => {
@@ -191,7 +193,7 @@
           expect(evt.detail.topic).to.be.equal('terminal/hello');
           done();
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
       it('test issue #4 regression', (done) => {
@@ -211,19 +213,20 @@
         };
         element.addEventListener('tsante-mqtt-delivered', listener);
         publisher.payload = '45';
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = HOSTURL;
       });
 
-      it('connection to wss://test.mosquitto.org:8081/', (done) => {
-        const element = fixture('basic');
-        element.addEventListener('tsante-mqtt-connect', (evt) => {
-          expect(evt.detail.status).to.be.true;
-          done();
-        }, {
-          once: true
-        });
-        element.host = 'wss://test.mosquitto.org:8081/';
-      });
+      // websocket seems to be down on test.mosquitto.org
+      // it('connection to wss://test.mosquitto.org:8081/', (done) => {
+      //   const element = fixture('basic');
+      //   element.addEventListener('tsante-mqtt-connect', (evt) => {
+      //     expect(evt.detail.status).to.be.true;
+      //     done();
+      //   }, {
+      //     once: true
+      //   });
+      //   element.host = 'wss://test.mosquitto.org:8081/';
+      // });
 
       it('test connection should not retry by default', (done) => {
         this.timeout(0);
@@ -240,11 +243,12 @@
             done(false);
           }
         });
+        // the url doesn't exists
         element.host = 'wss://127.0.0.1:8081/';
       });
 
       it('test connection retry', (done) => {
-        this.timeout(0);
+        this.timeout(20000);
         const element = fixture('basic');
         let count = 0;
         let start;
@@ -260,6 +264,7 @@
           }
         });
         element.retry = 5
+        // the url doesn't exists
         element.host = 'wss://127.0.0.1:8081/';
       });
     });

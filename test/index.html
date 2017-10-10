@@ -52,16 +52,16 @@
 
 <body>
   <div id="note">
-    <div class="note">
+    <!-- <div class="note">
       <p>The demo uses the test mqtt server provided by mosquitto.org.</p>
       <p>This server uses self-signed certificates, you must accept the certificate to run the demo. To do so, go to
         <a href="https://test.mosquitto.org:8081/" target="blank">https://test.mosquitto.org:8081/</a> and accept the certificate. Then reload the demo page.</p>
       <div style="text-align: center">
         <button onclick="window.location.reload();">refresh</button>
       </div>
-    </div>
+    </div> -->
     <div class="note">
-      <p>To test authentication, please run the docker-compose provided in the test directory</p>
+      <p>To run tests, please run the docker-compose provided in the test directory</p>
       <pre><code>docker-compose -f test/docker-compose.yml up -d</code></pre>
     </div>
     <div>
@@ -71,14 +71,10 @@
   <script>
     // Load and run all tests (.html, .js):
     WCT.loadSuites([
-      'tsante-mqtt_test.html',
-      'tsante-mqtt_authent.html',
+      'tsante-mqtt_test.html?dom=shady',
+      'tsante-mqtt_authent.html?dom=shady',
       'tsante-mqtt_test.html?dom=shadow',
       'tsante-mqtt_authent.html?dom=shadow',
-      'tsante-mqtt_test-es5.html',
-      'tsante-mqtt_authent-es5.html',
-      'tsante-mqtt_test-es5.html?dom=shadow',
-      'tsante-mqtt_authent-es5.html?dom=shadow',
     ]);
   </script>
 </body>
