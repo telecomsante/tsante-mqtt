@@ -11,6 +11,8 @@
 
   <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
   <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="../../paper-button/paper-button.html">
   <link rel="import" href="../tsante-mqtt.html">
 
   <style is="custom-style" include="demo-pages-shared-styles">
@@ -42,19 +44,17 @@
 
 <body>
   <div class="note">
-    <p>The demo uses the test mqtt server provided by mosquitto.org.</p>
-    <p>This server uses self-signed certificates, you must accept the certificate to run the demo. To do so, go to
-      <a href="https://test.mosquitto.org:8081/" target="blank">https://test.mosquitto.org:8081/</a>
-      and accept the certificate. Then reload the demo page.</p>
+    <p>The demo uses the test mqtt server provided by <a href="https://test.mosquitto.org" target="_blank">mosquitto.org</a>.</p>
+    <p>The websocket server could be down</p>
     <div style="text-align: center">
       <button onclick="window.location.reload();">refresh</button>
     </div>
   </div>
   <div class="vertical-section-container centered">
-    <h3>Subscribe demo</h3>
+    <h3>Publish demo</h3>
     <demo-snippet>
       <template>
-        <dom-bind id="demo">
+        <dom-bind id="demo2">
           <template>
             <style>
               #debug {
@@ -72,11 +72,24 @@
               #debug>div:nth-child(even) {
                 background: lightgray;
               }
+
               .error {
-                padding: 0px 5px;
                 color: red;
               }
 
+              .info {
+                color: dodgerblue;
+              }
+
+              .time, .type {
+                padding:0 5px;
+                width: 80px;
+              }
+
+              .msg {
+                padding: 0px 10px;
+              }
+
               .topic {
                 width: 150px;
                 padding: 0px 10px;
@@ -90,113 +103,75 @@
                 text-overflow: ellipsis;
                 white-space: nowrap;
               }
-            </style>
-            <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
-            <tsante-mqtt id="mqtt" host="wss://test.mosquitto.org:8081/">
-              <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
-            </tsante-mqtt>
-            <div id="debug"></div>
-            <script>
-              const demo = document.querySelector('#demo');
-              demo.$.mqtt.addEventListener('tsante-mqtt-connect-error', (err) => {
-                const div = document.createElement('div');
-                div.classList.add('error');
-                div.innerHTML = err.detail.message;
-                if (demo.$.debug.firstChild) {
-                  demo.$.debug.insertBefore(div, demo.$.debug.firstChild);
-                } else {
-                  demo.$.debug.appendChild(div);
-                }
-              })
-              demo.$.mqtt.addEventListener("tsante-mqtt-received", evt => {
-                const div = document.createElement('div');
-                let content = `<div class='topic'>${evt.detail.topic}</div>`;
-                content += `<div class='payload'>${evt.detail.payload}</div>`;
-                div.innerHTML = content;
-                if (demo.$.debug.firstChild) {
-                  demo.$.debug.insertBefore(div, demo.$.debug.firstChild);
-                } else {
-                  demo.$.debug.appendChild(div);
-                }
-              })
-            </script>
-          </template>
-        </dom-bind>
-      </template>
-    </demo-snippet>
 
-    <h3>Publish demo</h3>
-    <demo-snippet>
-      <template>
-        <dom-bind id="demo2">
-          <template>
-            <style>
-              #debug2 {
-                max-height: 300px;
-                overflow-y: auto;
+              paper-button {
+                background: dodgerblue;
+                color: white;
+                height:40px;
               }
 
-              #debug2>div {
+              .row {
                 display: flex;
-                border: 1px solid lightgray;
-                height: 25px;
                 align-items: center;
               }
-
-              #debug2>div:nth-child(even) {
-                background: lightgray;
-              }
-
-              .topic {
-                width: 150px;
-                padding: 0px 10px;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-              }
-
-              .payload {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+              .row paper-input {
+                flex:1;
               }
             </style>
             <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
-            <tsante-mqtt id="mqtt2" host="wss://test.mosquitto.org:8081/">
+            <div class="row">
+              <paper-input label="MQTT websocket url" value={{hostURL}}></paper-input>
+              <paper-button on-click='setHost'>Valid</paper-button>
+            </div>
+            <tsante-mqtt id="mqtt" host="[[host]]">
               <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
               <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer"></tsante-mqtt-subscriber>
             </tsante-mqtt>
-            <div id="debug2"></div>
+            <div id="debug"></div>
             <script>
               const demo2 = document.querySelector('#demo2');
-              // send q new messqge every 2 seconds
+              demo2.setHost = () => {
+                demo2.host = demo2.hostURL
+                const div = document.createElement('div');
+                info('info', `new URL : ${demo2.host}`)
+              }
+              demo2.hostURL = 'wss://test.mosquitto.org:8081/'
+              demo2.setHost()
+              // send a new messqge every 2 seconds
               setInterval(() => {
                 demo2.$.publisher.payload = demo2.$.publisher.payload === 'polymer' ? 'world' : 'polymer';
               }, 2000);
-              demo2.$.mqtt2.addEventListener("tsante-mqtt-delivered", evt => {
+              demo2.$.mqtt.addEventListener("tsante-mqtt-delivered", evt => {
                 const div = document.createElement('div');
-                let content = `<div class='type'>delivered</div>`;
-                content += `<div class='topic'>${evt.detail.topic}</div>`;
-                content += `<div class='payload'>${evt.detail.payload}</div>`;
-                div.innerHTML = content;
-                if (demo2.$.debug2.firstChild) {
-                  demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild);
-                } else {
-                  demo2.$.debug2.appendChild(div);
-                }
+                info('delivered', evt.detail)
               });
-              demo2.$.mqtt2.addEventListener("tsante-mqtt-received", evt => {
+              demo2.$.mqtt.addEventListener("tsante-mqtt-received", evt => {
                 const div = document.createElement('div');
-                let content = `<div class='type'>received</div>`;
-                content += `<div class='topic'>${evt.detail.topic}</div>`;
-                content += `<div class='payload'>${evt.detail.payload}</div>`;
-                div.innerHTML = content;
-                if (demo2.$.debug2.firstChild) {
-                  demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild);
-                } else {
-                  demo2.$.debug2.appendChild(div);
-                }
+                info('received', evt.detail)
               })
+              demo2.$.mqtt.addEventListener('tsante-mqtt-connect-error', (err) => {
+                info('error', err.detail.message)
+              })
+
+              function info(type, msg) {
+                const div = document.createElement('div');
+                div.classList.add(type)
+                let content = `
+                  <div class='time'>${new Intl.DateTimeFormat('fr-FR', {hour: "numeric", minute: "numeric", second: "numeric"}).format(Date.now())}</div>
+                  <div class='type'>${type}</div>`;
+                if(typeof msg === 'string') {
+                  content += `<div class='msg'>${msg}</div>`
+                } else {
+                  content += `<div class='topic'>${msg.topic}</div>`;
+                  content += `<div class='payload'>${msg.payload}</div>`;
+                }
+                div.innerHTML = content;
+                if (demo2.$.debug.firstChild) {
+                  demo2.$.debug.insertBefore(div, demo2.$.debug.firstChild);
+                } else {
+                  demo2.$.debug.appendChild(div);
+                }
+              }
             </script>
           </template>
         </dom-bind>
