@@ -178,12 +178,12 @@
        * @param  {String} message message of the error
        * @param  {Boolean} status status of the connection
        */
-      _onFail() {
+      _onFail(evt) {
         this._setConnected(false);
         this.dispatchEvent(new CustomEvent('tsante-mqtt-connect-error', {
           detail: {
             status: this.connected,
-            message: 'fail to connect',
+            message: evt.errorMessage,
           }
         }))
         this._retry();
