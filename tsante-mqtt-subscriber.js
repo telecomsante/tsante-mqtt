@@ -11,7 +11,26 @@ Polymer({
       value: "#",
       observer: '_topicChanged'
     },
-
+    /**
+     * qos
+     *
+     * the value of the qos could be 0, 1, 2
+     * @type {Number}
+     */
+    qos: {
+      type: Number,
+      value: null
+    },
+    /**
+     * timeout
+     *
+     * the timeout value in seconds
+     * @type {Number}
+     */
+    timeout: {
+      type: Number,
+      value: null
+    },
     /**
      * set when subscribe is sucessful
      * @type {Boolean}
