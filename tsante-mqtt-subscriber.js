@@ -15,6 +15,7 @@ Polymer({
      * qos
      *
      * the value of the qos could be 0, 1, 2
+     * https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels
      * @type {Number}
      */
     qos: {
