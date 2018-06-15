@@ -1,3 +1,7 @@
+# v1.3.0
+
+  - fix #9 : Add timeout and qos options for subscriber
+
 # v1.2.0
 
   - fix #7 : cannot publish the same payload when changing the topic
