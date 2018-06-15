@@ -13,7 +13,27 @@ Polymer({
       value: "#",
       observer: '_topicChanged'
     },
-
+    /**
+     * qos
+     *
+     * the value of the qos could be 0, 1, 2
+     * https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels
+     * @type {Number}
+     */
+    qos: {
+      type: Number,
+      value: 0
+    },
+    /**
+     * timeout
+     *
+     * the timeout value in seconds
+     * @type {Number}
+     */
+    timeout: {
+      type: Number,
+      value: null
+    },
     /**
      * set when subscribe is sucessful
      * @type {Boolean}
@@ -69,11 +89,18 @@ Polymer({
   _subscribe: function _subscribe() {
     if (this.parentElement.connected && !this.subscribed) {
       this.removeEventListener('tsante-mqtt-subscribed', this._subscribe);
-      this.parentElement.client.subscribe(this.topic, {
+      var subscribeOptions = {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic }
-      });
+      };
+      if (this.qos >= 0 && this.qos <= 2) {
+        subscribeOptions['qos'] = this.qos;
+      }
+      if (this.timeout) {
+        subscribeOptions['timeout'] = this.timeout;
+      }
+      this.parentElement.client.subscribe(this.topic, subscribeOptions);
     }
   },
 
