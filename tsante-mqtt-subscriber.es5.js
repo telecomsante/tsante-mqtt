@@ -94,13 +94,13 @@ Polymer({
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic }
       };
-      if (this.qos >= 0 && this.qos <= 2) {
-        subscribeOptions['qos'] = this.qos;
-      }
-      if (this.timeout) {
-        subscribeOptions['timeout'] = this.timeout;
-      }
-      this.parentElement.client.subscribe(this.topic, subscribeOptions);
+        if (this.qos >= 0 && this.qos <= 2) {
+          subscribeOptions['qos'] = this.qos;
+        }
+        if (this.timeout) {
+          subscribeOptions['timeout'] = this.timeout;
+        }
+        this.parentElement.client.subscribe(this.topic, subscribeOptions);
     }
   },
 

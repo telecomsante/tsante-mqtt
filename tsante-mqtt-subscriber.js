@@ -32,6 +32,7 @@ Polymer({
       type: Number,
       value: null
     },
+
     /**
      * set when subscribe is sucessful
      * @type {Boolean}
@@ -44,19 +45,19 @@ Polymer({
     },
   },
 
-  attached: function() {
-    if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
-      console.error('tsante-mqtt-subscriber must have a tsante-mqtt parent');
-    }
-    // when the parent is connected then subscribe to the topic
-    this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
-      if(evt.detail.status) {
-        this._subscribe();
-      } else if(this.subscribed) {
-        this._setSubscribed(false);
-        this.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
-      }
-    });
+  listeners:{
+    'tsante-mqtt-subscriber-needs':'setNeededProperties'
+
+  },
+
+  received: function(msg){
+    this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString })
+  },
+
+
+  setNeededProperties: function(connected,client){
+    this.connected = connected
+    this.client = client
   },
 
   /**
@@ -71,28 +72,25 @@ Polymer({
     if( newValue !== oldValue ){
       if(oldValue && this.subscribed) {
         this.unsubscribe(oldValue);
-        this.addEventListener('tsante-mqtt-subscribed', this._subscribe);
+        this.addEventListener('tsante-mqtt-subscribed', this.subscribe);
       } else {
-        this._subscribe();
+        this.subscribe();
       }
     }
   },
 
   /**
    * subscribe to the topic
-   * @method _subscribe
+   * @method subscribe
    */
-  _subscribe: function() {
-    if(this.parentElement.connected && !this.subscribed) {
-      this.removeEventListener('tsante-mqtt-subscribed', this._subscribe);
-      const subscribeOptions = {
+  subscribe: function(connected,client) {
+    if(connected && !this.subscribed) {
+      this.removeEventListener('tsante-mqtt-subscribed', this.subscribe);
+      client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic },
-      };
-      if(this.qos >= 0 && this.qos <= 2) { subscribeOptions['qos'] = this.qos; }
-      if(this.timeout) { subscribeOptions['timeout'] = this.timeout; }
-      this.parentElement.client.subscribe(this.topic, subscribeOptions);
+      });
     }
   },
 
@@ -129,7 +127,7 @@ Polymer({
    * @param  {String}  topic the topic to unsubscribe (default this.topic )
    */
   unsubscribe: function(topic = this.topic) {
-    this.parentElement.client.unsubscribe(topic, {
+    this.client.unsubscribe(topic, {
       onSuccess: this._onUnsubscribe.bind(this),
       onFailure: this._onUnsubscribeFail.bind(this),
       invocationContext: { topic: topic },
