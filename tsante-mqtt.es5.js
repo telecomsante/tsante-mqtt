@@ -112,8 +112,35 @@ Polymer({
     }
   },
 
-  observers: ['_initializeClient(host,clientID)', 'connect(username, password)'],
+  observers: ['sendInfoToPubSub(connected,client)', '_initializeClient(host,clientID)', 'connect(username, password)'],
 
+  sendInfoToPubSub: function sendInfoToPubSub(connected, client) {
+    pubSub = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'));
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = pubSub[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var value = _step.value;
+
+        value.setNeededProperties(this.connected, this.client);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+  },
   attached: function attached() {
     this.connect();
   },
@@ -171,7 +198,36 @@ Polymer({
    * @param {Boolean} status the status of the connection
    */
   _connectedChanged: function _connectedChanged() {
-    this.fire('tsante-mqtt-connect', { status: this.connected });
+    subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = subscribers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var value = _step2.value;
+
+        if (this.connected) {
+          value.subscribe(this.connected, this.client);
+        } else {
+          value._setSubscribed(false);
+          value.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
+        }
+      }
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+          _iterator2.return();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
   },
 
   _onConnectionLost: function _onConnectionLost(msg) {
@@ -196,7 +252,31 @@ Polymer({
    * @param  {String} payload content of the received message
    */
   _onMessageArrived: function _onMessageArrived(msg) {
-    this.fire('tsante-mqtt-received', { topic: msg.destinationName, payload: msg.payloadString });
+    subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
+    var _iteratorNormalCompletion3 = true;
+    var _didIteratorError3 = false;
+    var _iteratorError3 = undefined;
+
+    try {
+      for (var _iterator3 = subscribers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+        var value = _step3.value;
+
+        value.received(msg);
+      }
+    } catch (err) {
+      _didIteratorError3 = true;
+      _iteratorError3 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+          _iterator3.return();
+        }
+      } finally {
+        if (_didIteratorError3) {
+          throw _iteratorError3;
+        }
+      }
+    }
   },
 
   /**

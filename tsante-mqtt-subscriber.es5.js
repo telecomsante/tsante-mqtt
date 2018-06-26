@@ -22,7 +22,7 @@ Polymer({
      */
     qos: {
       type: Number,
-      value: 0
+      value: null
     },
     /**
      * timeout
@@ -34,6 +34,7 @@ Polymer({
       type: Number,
       value: null
     },
+
     /**
      * set when subscribe is sucessful
      * @type {Boolean}
@@ -46,21 +47,13 @@ Polymer({
     }
   },
 
-  attached: function attached() {
-    var _this = this;
+  received: function received(msg) {
+    this.fire('tsante-mqtt-received', { topic: msg.destinationName, payload: msg.payloadString });
+  },
 
-    if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
-      console.error('tsante-mqtt-subscriber must have a tsante-mqtt parent');
-    }
-    // when the parent is connected then subscribe to the topic
-    this.parentElement.addEventListener('tsante-mqtt-connect', function (evt) {
-      if (evt.detail.status) {
-        _this._subscribe();
-      } else if (_this.subscribed) {
-        _this._setSubscribed(false);
-        _this.fire('tsante-mqtt-subscribed', { topic: _this.topic, status: false });
-      }
-    });
+  setNeededProperties: function setNeededProperties(connected, client) {
+    this.connected = connected;
+    this.client = client;
   },
 
   /**
@@ -75,33 +68,26 @@ Polymer({
     if (newValue !== oldValue) {
       if (oldValue && this.subscribed) {
         this.unsubscribe(oldValue);
-        this.addEventListener('tsante-mqtt-subscribed', this._subscribe);
+        this.addEventListener('tsante-mqtt-subscribed', this.subscribe);
       } else {
-        this._subscribe();
+        this.subscribe();
       }
     }
   },
 
   /**
    * subscribe to the topic
-   * @method _subscribe
+   * @method subscribe
    */
-  _subscribe: function _subscribe() {
-    if (this.parentElement.connected && !this.subscribed) {
-      this.removeEventListener('tsante-mqtt-subscribed', this._subscribe);
-      var subscribeOptions = {
+  subscribe: function subscribe(connected, client) {
+    if (connected && !this.subscribed) {
+      this.removeEventListener('tsante-mqtt-subscribed', this.subscribe);
+      client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic }
-      };
-        if (this.qos >= 0 && this.qos <= 2) {
-          subscribeOptions['qos'] = this.qos;
-        }
-        if (this.timeout) {
-          subscribeOptions['timeout'] = this.timeout;
-        }
-        this.parentElement.client.subscribe(this.topic, subscribeOptions);
-    }
+      });
+    };
   },
 
   /**
@@ -138,7 +124,7 @@ Polymer({
   unsubscribe: function unsubscribe() {
     var topic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.topic;
 
-    this.parentElement.client.unsubscribe(topic, {
+    this.client.unsubscribe(topic, {
       onSuccess: this._onUnsubscribe.bind(this),
       onFailure: this._onUnsubscribeFail.bind(this),
       invocationContext: { topic: topic }
