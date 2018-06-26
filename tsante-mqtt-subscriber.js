@@ -45,19 +45,15 @@ Polymer({
     },
   },
 
-  listeners:{
-    'tsante-mqtt-subscriber-needs':'setNeededProperties'
-
-  },
 
   received: function(msg){
-    this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString })
+    this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString });
   },
 
 
   setNeededProperties: function(connected,client){
-    this.connected = connected
-    this.client = client
+    this.connected = connected;
+    this.client = client;
   },
 
   /**
@@ -91,7 +87,7 @@ Polymer({
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic },
       });
-    }
+    };
   },
 
   /**

@@ -94,14 +94,6 @@ Polymer({
       type: Object,
       notify: true,
     },
-    /**
-     * the list of the children, subscribers
-     * @type {Array}
-     */
-    subscribers:{
-      type: Array,
-      notify: true,
-    },
 
     /**
      * the connection status
@@ -123,8 +115,8 @@ Polymer({
   ],
 
   sendInfoToPubSub(connected,client) {
-    this.subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
-    for(let value of this.subscribers){
+    pubSub = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'))
+    for(let value of pubSub){
       value.setNeededProperties(this.connected,this.client)
     }
   },
@@ -182,12 +174,12 @@ Polymer({
    * @param {Boolean} status the status of the connection
    */
   _connectedChanged: function() {
-    this.subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
-    for(let value of this.subscribers){
+    subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
+    for(let value of subscribers){
       if(this.connected) {
         value.subscribe(this.connected,this.client)
       }else{
-        value._setSubscribed(false);
+        // value._setSubscribed(false);
         value.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
       }
     }
@@ -215,8 +207,8 @@ Polymer({
    * @param  {String} payload content of the received message
    */
   _onMessageArrived: function(msg) {
-    this.subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
-    for(let value of this.subscribers){
+    subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
+    for(let value of subscribers){
         value.received(msg);
     }
   },
