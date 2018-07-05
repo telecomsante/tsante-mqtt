@@ -7,6 +7,7 @@
 
   <title>tsante-mqtt test</title>
 
+  <script src="../bower_components/sinonjs/sinon.js"></script>
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
 
@@ -16,17 +17,19 @@
 <body>
   <test-fixture id="basic">
     <template>
-        <tsante-mqtt>
-          <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
-          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
-        </tsante-mqtt>
-      </template>
+      <tsante-mqtt>
+        <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+        <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+      </tsante-mqtt>
+    </template>
   </test-fixture>
   <div id="mocha"></div>
   <script>
-    describe('tsante-mqtt', function() {
+    describe('tsante-mqtt', function () {
+      const mosquittoUrl = '127.0.0.1'
+      const mosquittoPort = '9883'
 
-      afterEach(function() {
+      afterEach(function () {
         try {
           document.getElementById('basic').restore();
         } catch (err) {
@@ -34,7 +37,7 @@
         }
       });
 
-      it('instantiating the element works', function() {
+      it('instantiating the element works', function () {
         var element = fixture('basic');
         assert.equal(element.is, 'tsante-mqtt');
       });
@@ -46,7 +49,7 @@
         expect(subscriber.subscribed).to.be.false;
       });
 
-      it('error when connecting to ws://:8080/', (done) => {
+      it(`error when connecting to ws://:${mosquittoPort}/`, (done) => {
         const element = fixture('basic');
         element.addEventListener('tsante-mqtt-error', (evt) => {
           expect(evt.detail).to.be.a.string;
@@ -54,18 +57,20 @@
         }, {
           once: true
         });
-        element.host = 'ws://:8080/';
+        element.host = `ws://:${mosquittoPort}/`;
       });
 
-      it('connect to ws://test.mosquitto.org:8080/', (done) => {
+      it(`connect to ws://${mosquittoUrl}:${mosquittoPort}/`, (done) => {
         const element = fixture('basic');
         element.addEventListener('tsante-mqtt-connect', (evt) => {
+          console.log('client', element.client, 'connected?', element.connected)
+          expect(element.connected).to.be.true;
           expect(evt.detail.status).to.be.true;
           done();
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('if already connected, on connect the component should throw an error', (done) => {
@@ -85,12 +90,11 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('disconnect', (done) => {
         const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
         let count = 0;
 
         function check(evt) {
@@ -106,7 +110,7 @@
           }
         }
         element.addEventListener('tsante-mqtt-connect', check);
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('if already disconnected, on disconnect the component should throw an error', (done) => {
@@ -131,7 +135,7 @@
         }
         element.addEventListener('tsante-mqtt-connect', check);
         element.addEventListener('tsante-mqtt-error', onError);
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('subscriber should automatically subscribe on connect', (done) => {
@@ -145,26 +149,52 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
-      it('subscriber should automatically be unsubscribed on disconnect', (done) => {
+      it('subscriber should received one message on reconnect', async () => {
         const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
+        let cli
+        await Promise.all([
+          new Promise(resolve => element.addEventListener('tsante-mqtt-connect', resolve, {
+            once: true
+          })),
+          (element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`),
+          (cli = element.client)
+        ])
         let count = 0;
-        subscriber.addEventListener('tsante-mqtt-subscribed', (evt) => {
-          if (!count) {
-            count++;
-            expect(evt.detail.status).to.be.true;
-            setTimeout(element.disconnect(), 200);
-          } else {
-            expect(evt.detail.status).to.be.false;
-            expect(evt.detail.topic).to.be.equal('terminal/#');
-            expect(subscriber.subscribed).to.be.false;
-            done();
-          }
+        const expected = function (evt) {};
+        await element.disconnect();
+        expect(element.connected).to.be.false;
+        element.client = cli
+        await Promise.all([
+          new Promise(resolve => element.addEventListener('tsante-mqtt-connect', resolve, {
+            once: true
+          })),
+          (element.connect())
+        ])
+        const subscriber = element.querySelector('tsante-mqtt-subscriber');
+        const publisher = element.querySelector('tsante-mqtt-publisher')
+        publisher.payload = 'world'
+        expect(element.connected).to.be.true;
+        let nbReceived = 0
+        const timeoutReceived = new Promise(function (resolve) {
+          setTimeout(resolve, 3000)
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        const promiseReceived = new Promise(resolve =>
+          subscriber.addEventListener('tsante-mqtt-received', (evt) => {
+            expect(evt.detail.payload).to.be.equal('world');
+            expect(evt.detail.topic).to.be.equal('terminal/hello');
+            nbReceived++
+          })
+        )
+        const resolveReceived = new Promise((resolve, nbReceived) => {
+          if (nbReceived > 1) {
+            resolve()
+          }
+        })
+        await Promise.race([promiseReceived, resolveReceived, timeoutReceived])
+        expect(nbReceived).to.be.equal(1)
       });
 
       it('publisher should automatically publish on connect', (done) => {
@@ -177,21 +207,21 @@
           expect(evt.detail.topic).to.be.equal('terminal/hello');
           done();
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('subscriber should receive the published message', (done) => {
         const element = fixture('basic');
         const subscriber = element.querySelector('tsante-mqtt-subscriber');
         const publisher = element.querySelector('tsante-mqtt-publisher');
-        let count = 0;
         publisher.payload = 'world';
+        console.log('subReceived');
         element.addEventListener('tsante-mqtt-received', (evt) => {
           expect(evt.detail.payload).to.be.equal('world');
           expect(evt.detail.topic).to.be.equal('terminal/hello');
           done();
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('test issue #4 regression', (done) => {
@@ -211,7 +241,7 @@
         };
         element.addEventListener('tsante-mqtt-delivered', listener);
         publisher.payload = '45';
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('connection to wss://test.mosquitto.org:8081/', (done) => {
@@ -263,6 +293,7 @@
         element.host = 'wss://127.0.0.1:8081/';
       });
     });
+
   </script>
 </body>
 

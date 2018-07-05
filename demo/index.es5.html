@@ -92,8 +92,10 @@
           </style>
           <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
           <tsante-mqtt id="mqtt2" host="wss://test.mosquitto.org:8081/" >
-            <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
-            <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
+            <div>
+              <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
+              <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
+            </div>
           </tsante-mqtt>
           <div id="debug2"></div>
           <script>
