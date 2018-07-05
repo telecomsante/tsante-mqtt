@@ -115,7 +115,7 @@ Polymer({
   ],
 
   sendInfoToPubSub(connected,client) {
-    pubSub = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'))
+    let pubSub = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'))
     for(let value of pubSub){
       value.setNeededProperties(this.connected,this.client)
     }
@@ -139,7 +139,9 @@ Polymer({
   },
 
   _onConnect: function() {
+    console.log('connect')
     this._setConnected(true);
+    console.log('connected?mqtt',this.connected)
   },
 
   /**
@@ -174,13 +176,15 @@ Polymer({
    * @param {Boolean} status the status of the connection
    */
   _connectedChanged: function() {
-    subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
+    let subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
     for(let value of subscribers){
       if(this.connected) {
         value.subscribe(this.connected,this.client)
-      }else{
+        value._setSubscribed(true)
+        this.fire('tsante-mqtt-connect', { status:this.connected });
+      // }else{
         // value._setSubscribed(false);
-        value.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
+        // value.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
       }
     }
   },
@@ -207,9 +211,13 @@ Polymer({
    * @param  {String} payload content of the received message
    */
   _onMessageArrived: function(msg) {
-    subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
+    let subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
+    console.log('msg',msg)
     for(let value of subscribers){
+      // if (value.topic === msg.destinationName) {
+        console.log('value')
         value.received(msg);
+      // }
     }
   },
 
@@ -236,7 +244,9 @@ Polymer({
      * @param {String} topic the topic
      * @param {String} payload the content of the message
      */
-    this.fire('tsante-mqtt-delivered', { topic:msg.destinationName, payload:msg.payloadString })
+    if(typeof msg.payloadString === 'string'){
+      this.fire('tsante-mqtt-delivered', { topic:msg.destinationName, payload:msg.payloadString })
+    }
   },
 
   /**
@@ -247,6 +257,7 @@ Polymer({
    * @param  {String} password the password to use
    */
   connect: function(username, password) {
+    console.log('this.usr, this.pswd1',this.username,this.password,this.client)
     if(!this.client) return;
     this.debounce('connect',() => {
       const connectOption = {
@@ -256,12 +267,16 @@ Polymer({
         cleanSession: this.cleanSession,
       };
       if(this.username || username) {
+        this.username = this.username || username;
         connectOption.userName = this.username || username;
       }
       if(this.password || password) {
+        this.password = this.password || password;
         connectOption.password = this.password || password;
       }
-
+      // this._setConnected(true)
+      console.log('this.usr, this.pswd2',this.connected)
+      console.log('opt',connectOption)
       try {
         this.client.connect(connectOption);
       } catch(err) {
@@ -275,9 +290,16 @@ Polymer({
    * @method disconnect
    */
   disconnect: function() {
+    console.log('disconnection')
+    // if (!this.client) return;
     try {
+      console.log('disconnection2')
       this.client.disconnect();
+      console.log('disconnection3')
       this._setConnected(false);
+      console.log('disconnection4')
+      this.fire('tsante-mqtt-connect', { status:this.connected });
+      console.log('disconnection5')
     } catch(err) {
       this._onError(err.message);
     }

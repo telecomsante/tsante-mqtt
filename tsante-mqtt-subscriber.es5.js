@@ -44,16 +44,31 @@ Polymer({
       value: false,
       readOnly: true,
       reflectToAttribute: true
+    },
+    connected: {
+      type: Boolean,
+      observer: 'isConnected'
     }
   },
 
+  isConnected: function isConnected() {
+    console.log('isConnected');
+    if (!this.connected && this.subscribed) this.unsubscribe();
+  },
+
   received: function received(msg) {
+    console.log('receivedSubscriber');
     this.fire('tsante-mqtt-received', { topic: msg.destinationName, payload: msg.payloadString });
   },
 
+  // _setSubscribed: function(sub){
+  //   this.subscribed=sub
+  // },
+
   setNeededProperties: function setNeededProperties(connected, client) {
-    this.connected = connected;
+    console.log('subNeeded');
     this.client = client;
+    this.connected = connected;
   },
 
   /**
@@ -82,6 +97,7 @@ Polymer({
   subscribe: function subscribe(connected, client) {
     if (connected && !this.subscribed) {
       this.removeEventListener('tsante-mqtt-subscribed', this.subscribe);
+      console.log('topicSubscribe', this.topic);
       client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
@@ -124,11 +140,17 @@ Polymer({
   unsubscribe: function unsubscribe() {
     var topic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.topic;
 
-    this.client.unsubscribe(topic, {
-      onSuccess: this._onUnsubscribe.bind(this),
-      onFailure: this._onUnsubscribeFail.bind(this),
-      invocationContext: { topic: topic }
-    });
+    console.log('unsubscribe');
+    // const _this = this
+    // this.client.unsubscribe(topic, {
+    // onSuccess: this._onUnsubscribe.bind(this),
+    //   onFailure: this._onUnsubscribeFail.bind(_this),
+    //   invocationContext: { topic: topic },
+    // });
+    console.log('_onUnsubscribe');
+    this._setSubscribed(false);
+    this.fire('tsante-mqtt-subscribed', { topic: topic, status: false });
+    console.log('unsub');
   },
 
   /**
@@ -136,15 +158,17 @@ Polymer({
    * @method _onUnsubscribe
    * @param  {Object} evt
    */
-  _onUnsubscribe: function _onUnsubscribe(evt) {
-    this._setSubscribed(false);
-    this.fire('tsante-mqtt-subscribed', { topic: evt.invocationContext.topic, status: false });
-  },
+  // _onUnsubscribe: function(evt) {
+  //   console.log('_onUnsubscribe')
+  //   this._setSubscribed(false);
+  //   this.fire('tsante-mqtt-subscribed', { topic: evt.invocationContext.topic, status: false });
+  // },
 
-  _onUnsubscribeFail: function _onUnsubscribeFail(evt) {
-    this._setSubscribed(true);
-    this._onError(evt);
-  },
+  // _onUnsubscribeFail: function(evt) {
+  //   console.log('_onUnsubscribeFail')
+  //   this._setSubscribed(true);
+  //   this._onError(evt);
+  // },
 
   /**
    * fired on subscription/unsupscription error
