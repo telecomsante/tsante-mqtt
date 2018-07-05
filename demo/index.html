@@ -59,23 +59,30 @@
           .payload { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
           </style>
           <!-- host="ws://192.168.1.68:9883/" username="myapp" password="myapp" -->
-          <tsante-mqtt id="mqtt" host="wss://test.mosquitto.org:8081/" >
-            <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+          <tsante-mqtt host="wss://test.mosquitto.org:8081/" >
+            <div class="mqtt">
+              <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+            </div>
+            <div class="mqtt">
+              <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+            </div>
           </tsante-mqtt>
           <div id="debug"></div>
           <script>
-          const demo = document.querySelector('#demo');
-          demo.$.mqtt.addEventListener("tsante-mqtt-received", evt => {
-            const div = document.createElement('div');
-            let content = `<div class='topic'>${evt.detail.topic}</div>`;
-            content+=  `<div class='payload'>${evt.detail.payload}</div>`;
-            div.innerHTML = content;
-            if(demo.$.debug.firstChild) {
-              demo.$.debug.insertBefore(div, demo.$.debug.firstChild);
-            } else {
-              demo.$.debug.appendChild(div);
-            }
-          })
+          const mqtt = document.getElementsByClassName('mqtt');
+            for(element of mqtt) {
+              element.addEventListener("tsante-mqtt-received", evt => {
+                const div = document.createElement('div');
+                let content = `<div class='topic'>${evt.detail.topic}</div>`;
+                content+=  `<div class='payload'>${evt.detail.payload}</div>`;
+                div.innerHTML = content;
+                if(demo.$.debug.firstChild) {
+                  demo.$.debug.insertBefore(div, demo.$.debug.firstChild);
+                } else {
+                  demo.$.debug.appendChild(div);
+                }
+            });
+          }
           </script>
         </template>
       </demo-snippet>

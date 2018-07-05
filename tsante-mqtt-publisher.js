@@ -6,7 +6,7 @@ Polymer({
      * the topic to publish in
      *
      * when the topic is changed, the payload is changed to null.
-     * 
+     *
      * @type {String}
      */
     topic: {
@@ -39,23 +39,36 @@ Polymer({
       type: String,
       value: null,
     },
+    alreadyPublished: {
+      type: Boolean,
+      value: false,
+      // observer: 'isConnected'
+    },
+    connected: {
+      type: Boolean,
+      // observer: 'isConnected'
+    },
   },
 
   observers: [
+    'isConnected(alreadyPublished,connected)',
     'publish(payload)',
   ],
 
-  attached: function() {
-    if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
-      console.error('tsante-mqtt-publisher must have a tsante-mqtt parent');
-    }
-    this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
-      if(evt.detail.status && this.payload) { this.publish(); }
-    });
+  setNeededProperties: function(connected,client){
+    console.log('pubNeeded')
+    this.connected = connected
+    this.client = client
+  },
+
+  isConnected: function(){
+    console.log('isConnected');
+    if (this.connected === true && !this.alreadyPublished && this.client) this.publish();
   },
 
   _topicChanged: function(newValue) {
     this.payload = null;
+    this.alreadyPublished = false;
   },
 
   /**
@@ -67,12 +80,15 @@ Polymer({
    * @param  {Boolean} retained flag indicates that the server must or not keep the value by default this.retained
    */
   publish: function(payload, qos, retained) {
-      if(this.parentElement.connected) {
-        payload = typeof payload === "string"?payload:this.payload;
-        if(payload === null) return;
-        qos = (!qos || isNaN(qos))?this.qos:qos;
-        retained = typeof retained === 'boolean'?retained:this.retained;
-        this.parentElement.client.send(this.topic, payload, qos, retained);
-      }
+    console.log('pubCli',this.client)
+    if(this.connected) {
+      console.log('publish on connected')
+      payload = typeof payload === 'string'?payload:this.payload;
+      if(payload === null) return;
+      qos = (!qos || isNaN(qos))?this.qos:qos;
+      retained = typeof retained === 'boolean'?retained:this.retained;
+      this.client.send(this.topic, payload, qos, retained);
+      this.alreadyPublished = true;
+    }
   }
 });
