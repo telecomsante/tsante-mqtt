@@ -161,9 +161,7 @@ Polymer({
   },
 
   _onConnect: function _onConnect() {
-    console.log('connect');
     this._setConnected(true);
-    console.log('connected?mqtt', this.connected);
   },
 
   /**
@@ -257,7 +255,6 @@ Polymer({
    */
   _onMessageArrived: function _onMessageArrived(msg) {
     var subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
-    console.log('msg', msg);
     var _iteratorNormalCompletion3 = true;
     var _didIteratorError3 = false;
     var _iteratorError3 = undefined;
@@ -266,10 +263,7 @@ Polymer({
       for (var _iterator3 = subscribers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
         var value = _step3.value;
 
-        // if (value.topic === msg.destinationName) {
-        console.log('value');
         value.received(msg);
-        // }
       }
     } catch (err) {
       _didIteratorError3 = true;
@@ -325,7 +319,6 @@ Polymer({
   connect: function connect(username, password) {
     var _this = this;
 
-    console.log('this.usr, this.pswd1', this.username, this.password, this.client);
     if (!this.client) return;
     this.debounce('connect', function () {
       var connectOption = {
@@ -342,9 +335,6 @@ Polymer({
         _this.password = _this.password || password;
         connectOption.password = _this.password || password;
       }
-      // this._setConnected(true)
-      console.log('this.usr, this.pswd2', _this.connected);
-      console.log('opt', connectOption);
       try {
         _this.client.connect(connectOption);
       } catch (err) {
@@ -358,16 +348,11 @@ Polymer({
    * @method disconnect
    */
   disconnect: function disconnect() {
-    console.log('disconnection');
     // if (!this.client) return;
     try {
-      console.log('disconnection2');
       this.client.disconnect();
-      console.log('disconnection3');
       this._setConnected(false);
-      console.log('disconnection4');
       this.fire('tsante-mqtt-connect', { status: this.connected });
-      console.log('disconnection5');
     } catch (err) {
       this._onError(err.message);
     }
