@@ -21,12 +21,10 @@
   },
   "homepage": "https://github.com/telecomsante/tsante-mqtt#readme",
   "devDependencies": {
-    "babel-cli": "^6.23.0",
-    "babel-preset-env": "^1.2.0",
-    "polymer-cli": "^1.7.3"
-  },
-  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "bower": "^1.8.4",
-    "sinon": "^6.0.1"
+    "sinon": "^6.1.3",
+    "polymer-cli": "^1.7.7"
   }
 }
