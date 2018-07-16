@@ -1,3 +1,12 @@
+# current
+
+- allow tsante-subscribers to be embed deeper, they doesn't need to be direct child of tsante-mqtt
+
+Internal :
+
+- send tsante-mqtt's connected and client properties to all tsante-mqtt-subscriber children
+- adding an array subscribers, wich contains the list of the (grand)children named tsante-mqtt-subscriber
+
 # v1.3.0
 
   - fix #9 : Add timeout and qos options for subscriber
