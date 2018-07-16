@@ -56,13 +56,11 @@ Polymer({
   ],
 
   setNeededProperties: function(connected,client){
-    console.log('pubNeeded')
     this.connected = connected
     this.client = client
   },
 
   isConnected: function(){
-    console.log('isConnected');
     if (this.connected === true && !this.alreadyPublished && this.client) this.publish();
   },
 
@@ -80,9 +78,7 @@ Polymer({
    * @param  {Boolean} retained flag indicates that the server must or not keep the value by default this.retained
    */
   publish: function(payload, qos, retained) {
-    console.log('pubCli',this.client)
     if(this.connected) {
-      console.log('publish on connected')
       payload = typeof payload === 'string'?payload:this.payload;
       if(payload === null) return;
       qos = (!qos || isNaN(qos))?this.qos:qos;

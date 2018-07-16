@@ -23,7 +23,9 @@
       </tsante-mqtt>
     </template>
   </test-fixture>
+
   <div id="mocha"></div>
+  
   <script>
     describe('tsante-mqtt', function () {
       const mosquittoUrl = '127.0.0.1'
@@ -63,7 +65,6 @@
       it(`connect to ws://${mosquittoUrl}:${mosquittoPort}/`, (done) => {
         const element = fixture('basic');
         element.addEventListener('tsante-mqtt-connect', (evt) => {
-          console.log('client', element.client, 'connected?', element.connected)
           expect(element.connected).to.be.true;
           expect(evt.detail.status).to.be.true;
           done();
@@ -215,7 +216,6 @@
         const subscriber = element.querySelector('tsante-mqtt-subscriber');
         const publisher = element.querySelector('tsante-mqtt-publisher');
         publisher.payload = 'world';
-        console.log('subReceived');
         element.addEventListener('tsante-mqtt-received', (evt) => {
           expect(evt.detail.payload).to.be.equal('world');
           expect(evt.detail.topic).to.be.equal('terminal/hello');

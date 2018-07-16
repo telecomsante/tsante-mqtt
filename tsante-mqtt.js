@@ -139,9 +139,7 @@ Polymer({
   },
 
   _onConnect: function() {
-    console.log('connect')
     this._setConnected(true);
-    console.log('connected?mqtt',this.connected)
   },
 
   /**
@@ -212,12 +210,8 @@ Polymer({
    */
   _onMessageArrived: function(msg) {
     let subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
-    console.log('msg',msg)
     for(let value of subscribers){
-      // if (value.topic === msg.destinationName) {
-        console.log('value')
-        value.received(msg);
-      // }
+      value.received(msg);
     }
   },
 
@@ -257,7 +251,6 @@ Polymer({
    * @param  {String} password the password to use
    */
   connect: function(username, password) {
-    console.log('this.usr, this.pswd1',this.username,this.password,this.client)
     if(!this.client) return;
     this.debounce('connect',() => {
       const connectOption = {
@@ -274,9 +267,6 @@ Polymer({
         this.password = this.password || password;
         connectOption.password = this.password || password;
       }
-      // this._setConnected(true)
-      console.log('this.usr, this.pswd2',this.connected)
-      console.log('opt',connectOption)
       try {
         this.client.connect(connectOption);
       } catch(err) {
@@ -290,16 +280,11 @@ Polymer({
    * @method disconnect
    */
   disconnect: function() {
-    console.log('disconnection')
     // if (!this.client) return;
     try {
-      console.log('disconnection2')
       this.client.disconnect();
-      console.log('disconnection3')
       this._setConnected(false);
-      console.log('disconnection4')
       this.fire('tsante-mqtt-connect', { status:this.connected });
-      console.log('disconnection5')
     } catch(err) {
       this._onError(err.message);
     }
