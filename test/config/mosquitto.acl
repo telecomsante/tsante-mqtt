@@ -1,5 +1,6 @@
 topic read terminal/#
 topic write req/terminal/#
+topic write terminal/hello
 
 user admin
 topic readwrite terminal/#
