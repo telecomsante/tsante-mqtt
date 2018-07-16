@@ -4,8 +4,11 @@
   "scripts": {
     "postinstall": "bower install",
     "start": "polymer serve",
-    "test": "polymer test",
-    "build-es5": "babel tsante-mqtt-subscriber.js -o tsante-mqtt-subscriber.es5.js && babel tsante-mqtt-publisher.js -o tsante-mqtt-publisher.es5.js && babel tsante-mqtt.js -o tsante-mqtt.es5.js"
+    "test": "npm run start:mosquitto && polymer test && npm run stop:mosquitto",
+    "test:polymer": "polymer test",
+    "build-es5": "babel tsante-mqtt-subscriber.js -o tsante-mqtt-subscriber.es5.js && babel tsante-mqtt-publisher.js -o tsante-mqtt-publisher.es5.js && babel tsante-mqtt.js -o tsante-mqtt.es5.js",
+    "start:mosquitto": "docker-compose -f test/docker-compose.yml up -d",
+    "stop:mosquitto": "docker-compose -f test/docker-compose.yml down"
   },
   "repository": {
     "type": "git",
