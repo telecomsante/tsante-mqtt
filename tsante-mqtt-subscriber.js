@@ -8,7 +8,7 @@ Polymer({
      */
     topic: {
       type: String,
-      value: "#",
+      value: '#',
       observer: '_topicChanged'
     },
     /**
@@ -55,7 +55,13 @@ Polymer({
   },
 
   received: function(msg){
-    this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString });
+    let rightTopic
+    if (this.topic[this.topic.length-1]==='#'){
+      rightTopic = msg.destinationName.split('/').slice(0,-1).join('') === this.topic.split('/').slice(0,-1).join('')
+    }
+    if (rightTopic || msg.destinationName === this.topic) {
+      this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString });
+    }
   },
 
   setNeededProperties: function(connected,client){
