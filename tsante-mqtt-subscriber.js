@@ -57,7 +57,8 @@ Polymer({
   received: function(msg){
     let rightTopic
     if (this.topic[this.topic.length-1]==='#'){
-      rightTopic = msg.destinationName.split('/').slice(0,-1).join('') === this.topic.split('/').slice(0,-1).join('')
+      let shortTopic = this.topic.split('/').slice(0,-1).join('');
+      rightTopic = msg.destinationName.split('/').slice(0,-1).join('').slice(0,shortTopic.length) === shortTopic;
     }
     if (rightTopic || msg.destinationName === this.topic) {
       this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString });
