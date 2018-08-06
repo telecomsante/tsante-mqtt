@@ -60,6 +60,21 @@
         });
       });
 
+      it('bad login', (done) => {
+        const element = fixture('auth');
+        element.username = 'test';
+        element.password = 'admin';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
+
+        function check(evt) {
+          element.removeEventListener('tsante-mqtt-connect-error', check);
+          expect(evt.detail.status).to.be.false;
+          expect(evt.detail.message).to.be.equal("fail to connect");
+          done();
+        };
+        element.addEventListener('tsante-mqtt-connect-error', check);
+      });
+
       it('connect as admin', (done) => {
         const element = fixture('auth');
         element.username = 'admin';

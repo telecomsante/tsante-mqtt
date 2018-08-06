@@ -18,14 +18,8 @@
   <test-fixture id="basic">
     <template>
       <tsante-mqtt>
-        <div>
-          <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
-          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
-        </div>
-        <div>
-          <tsante-mqtt-subscriber topic="terminal/world"></tsante-mqtt-subscriber>
-          <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
-        </div>
+        <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+        <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
       </tsante-mqtt>
     </template>
   </test-fixture>
@@ -283,7 +277,7 @@
         expect(nbReceived).to.be.equal(nbRightSubscribers);
       });
 
-      it('test issue #4 regression', (done) => {
+      it('ensures that payload is always the last edited property, ( regression #4)', (done) => {
         const element = fixture('basic');
         const subscriber = element.querySelector('tsante-mqtt-subscriber');
         const publisher = element.querySelector('tsante-mqtt-publisher');
@@ -303,7 +297,7 @@
         element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
-      it('connection to wss://test.mosquitto.org:8081/', (done) => {
+      it('TLS connection to wss://test.mosquitto.org:8081/', (done) => {
         const element = fixture('basic');
         element.addEventListener('tsante-mqtt-connect', (evt) => {
           expect(evt.detail.status).to.be.true;
@@ -314,7 +308,7 @@
         element.host = 'wss://test.mosquitto.org:8081/';
       });
 
-      it('test connection should not retry by default', (done) => {
+      it('connection should not retry by default', (done) => {
         this.timeout(0);
         const element = fixture('basic');
         let count = 0;
@@ -329,10 +323,10 @@
             done(false);
           }
         });
-        element.host = 'wss://127.0.0.1:8081/';
+        element.host = `ws://${mosquittoUrl}:8081/`;
       });
 
-      it('test connection retry', (done) => {
+      it('connection retry', (done) => {
         this.timeout(0);
         const element = fixture('basic');
         let count = 0;
@@ -349,7 +343,7 @@
           }
         });
         element.retry = 5
-        element.host = 'wss://127.0.0.1:8081/';
+        element.host = `ws://${mosquittoUrl}:8081/`;
       });
     });
 
