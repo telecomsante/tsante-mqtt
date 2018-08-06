@@ -6,7 +6,7 @@ Polymer({
     /**
      * the url of the server
      *
-     * by exapmple :
+     * by example :
      * `ws://test.mosquitto.org:8080/`
      *
      * @type {String}
@@ -109,15 +109,24 @@ Polymer({
   },
 
   observers: [
-    'sendInfoToPubSub(connected,client)',
+    '_sendInfoToPubSub(connected, client)',
     '_initializeClient(host,clientID)',
     'connect(username, password)',
   ],
 
-  sendInfoToPubSub(connected,client) {
-    let pubSub = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'))
-    for(let value of pubSub){
-      value.setNeededProperties(this.connected,this.client)
+
+  /**
+   * on connected change or client change
+   * update publishers and subscribers children
+   * @method sendInfoToPubSub
+   *
+   * @param {*} connected
+   * @param {*} client
+   */
+  _sendInfoToPubSub(connected, client) {
+    let pubSubs = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'))
+    for(let pubSub of pubSubs){
+      pubSub.setNeededProperties(connected, client)
     }
   },
 
@@ -175,11 +184,13 @@ Polymer({
    */
   _connectedChanged: function() {
     let subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
-    for(let value of subscribers){
+    if(this.connected) {
+      this.fire('tsante-mqtt-connect', { status: this.connected });
+    }
+    for(let subscriber of subscribers){
       if(this.connected) {
-        value.subscribe(this.connected,this.client)
-        value._setSubscribed(true)
-        this.fire('tsante-mqtt-connect', { status:this.connected });
+        subscriber.subscribe(this.connected, this.client)
+        subscriber._setSubscribed(true)
       // }else{
         // value._setSubscribed(false);
         // value.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
@@ -193,25 +204,13 @@ Polymer({
   },
 
   /**
-   * fired when a message is read
+   * when a message is received transfert it to the subscribers
    *
-   * example of the `evt.detail` :
-   *
-   * ```
-   * {
-   *   topic: "terminal/hello",
-   *   payload: "polymer"
-   * }
-   * ```
-   *
-   * @event tsante-mqtt-received
-   * @param  {String} topic topic of the received message
-   * @param  {String} payload content of the received message
    */
   _onMessageArrived: function(msg) {
     let subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'))
-    for(let value of subscribers){
-      value.received(msg);
+    for(let subscriber of subscribers){
+      subscriber._received(msg);
     }
   },
 
@@ -284,7 +283,7 @@ Polymer({
     try {
       this.client.disconnect();
       this._setConnected(false);
-      this.fire('tsante-mqtt-connect', { status:this.connected });
+      this.fire('tsante-mqtt-connect', { status: this.connected });
     } catch(err) {
       this._onError(err.message);
     }

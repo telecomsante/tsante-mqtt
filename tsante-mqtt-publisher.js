@@ -39,29 +39,33 @@ Polymer({
       type: String,
       value: null,
     },
-    alreadyPublished: {
+    /**
+     * the connection status of the `tsante-mqtt` ancestor
+     * @type {Boolean}
+     */
+    _connected: {
       type: Boolean,
       value: false,
-      // observer: 'isConnected'
     },
-    connected: {
-      type: Boolean,
-      // observer: 'isConnected'
-    },
+    /**
+     * the mqtt client of the `tsante-mqtt` ancestor
+     * @type {Object}
+     */
+    _client: Object
   },
 
   observers: [
-    'isConnected(alreadyPublished,connected)',
+    '_isConnected(_connected)',
     'publish(payload)',
   ],
 
-  setNeededProperties: function(connected,client){
-    this.connected = connected
-    this.client = client
+  setNeededProperties: function(connected, client){
+    this._connected = connected
+    this._client = client
   },
 
-  isConnected: function(){
-    if (this.connected === true && !this.alreadyPublished && this.client) this.publish();
+  _isConnected: function(_connected){
+    if (_connected  && this._client) this.publish();
   },
 
   _topicChanged: function(newValue) {
@@ -78,13 +82,12 @@ Polymer({
    * @param  {Boolean} retained flag indicates that the server must or not keep the value by default this.retained
    */
   publish: function(payload, qos, retained) {
-    if(this.connected) {
+    if(this._connected) {
       payload = typeof payload === 'string'?payload:this.payload;
       if(payload === null) return;
       qos = (!qos || isNaN(qos))?this.qos:qos;
       retained = typeof retained === 'boolean'?retained:this.retained;
-      this.client.send(this.topic, payload, qos, retained);
-      this.alreadyPublished = true;
+      this._client.send(this.topic, payload, qos, retained);
     }
   }
 });

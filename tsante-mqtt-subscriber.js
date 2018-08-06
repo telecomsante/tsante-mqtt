@@ -43,31 +43,60 @@ Polymer({
       readOnly: true,
       reflectToAttribute: true,
     },
-    connected: {
+
+    _connected: {
       type: Boolean,
       observer: 'isConnected'
     },
+    _client: Object,
   },
 
 
   isConnected: function(){
-    if (!this.connected && this.subscribed) this.unsubscribe()
+    if (!this._connected && this.subscribed) this.unsubscribe()
   },
-
-  received: function(msg){
+  
+  /**
+   * filter received messages
+   * 
+   * This method is called by the `tsante-mqtt` ancestor when a message is received
+   * 
+   *
+   * @param {destinationName, payloadString} msg
+   */
+  _received: function(msg){
     let rightTopic
     if (this.topic[this.topic.length-1]==='#'){
       let shortTopic = this.topic.split('/').slice(0,-1).join('');
       rightTopic = msg.destinationName.split('/').slice(0,-1).join('').slice(0,shortTopic.length) === shortTopic;
     }
     if (rightTopic || msg.destinationName === this.topic) {
-      this.fire('tsante-mqtt-received', { topic:msg.destinationName, payload:msg.payloadString });
+      this._fireReceived({ topic: msg.destinationName, payload: msg.payloadString });
     }
   },
 
-  setNeededProperties: function(connected,client){
-    this.client = client;
-    this.connected = connected;
+  /**
+   * fire an event on received message
+   * 
+   * example of the `evt.detail` :
+   *
+   * ```
+   * {
+   *   topic: "terminal/hello",
+   *   payload: "polymer"
+   * }
+   * ```
+   * 
+   * @event tsante-mqtt-received
+   * @param  {String} topic topic of the received message
+   * @param  {String} payload content of the received message
+   */
+  _fireReceived: function({topic, payload}) {
+    this.fire('tsante-mqtt-received', { topic, payload });
+  },
+
+  setNeededProperties: function(connected){
+     this._connected = connected;
   },
 
   /**
@@ -88,12 +117,16 @@ Polymer({
       }
     }
   },
-
+  
   /**
    * subscribe to the topic
+   * this method is called by the `tsante-mqtt`
    * @method subscribe
+   *
+   * @param {*} connected the connected status of the tsante-mqtt parent
+   * @param {*} client the mqtt client of the tsante-mqtt parent
    */
-  subscribe: function(connected,client) {
+  subscribe: function(connected, client) {
     if(connected && !this.subscribed) {
       this.removeEventListener('tsante-mqtt-subscribed', this.subscribe);
       client.subscribe(this.topic, {
