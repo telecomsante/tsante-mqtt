@@ -8,7 +8,7 @@ Polymer({
     /**
      * the url of the server
      *
-     * by exapmple :
+     * by example :
      * `ws://test.mosquitto.org:8080/`
      *
      * @type {String}
@@ -112,19 +112,27 @@ Polymer({
     }
   },
 
-  observers: ['sendInfoToPubSub(connected,client)', '_initializeClient(host,clientID)', 'connect(username, password)'],
+  observers: ['_sendInfoToPubSub(connected, client)', '_initializeClient(host,clientID)', 'connect(username, password)'],
 
-  sendInfoToPubSub: function sendInfoToPubSub(connected, client) {
-    var pubSub = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'));
+  /**
+   * on connected change or client change
+   * update publishers and subscribers children
+   * @method sendInfoToPubSub
+   *
+   * @param {*} connected
+   * @param {*} client
+   */
+  _sendInfoToPubSub: function _sendInfoToPubSub(connected, client) {
+    var pubSubs = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'));
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
     var _iteratorError = undefined;
 
     try {
-      for (var _iterator = pubSub[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var value = _step.value;
+      for (var _iterator = pubSubs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var pubSub = _step.value;
 
-        value.setNeededProperties(this.connected, this.client);
+        pubSub.setNeededProperties(connected, client);
       }
     } catch (err) {
       _didIteratorError = true;
@@ -199,18 +207,20 @@ Polymer({
    */
   _connectedChanged: function _connectedChanged() {
     var subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
+    if (this.connected) {
+      this.fire('tsante-mqtt-connect', { status: this.connected });
+    }
     var _iteratorNormalCompletion2 = true;
     var _didIteratorError2 = false;
     var _iteratorError2 = undefined;
 
     try {
       for (var _iterator2 = subscribers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-        var value = _step2.value;
+        var subscriber = _step2.value;
 
         if (this.connected) {
-          value.subscribe(this.connected, this.client);
-          value._setSubscribed(true);
-          this.fire('tsante-mqtt-connect', { status: this.connected });
+          subscriber.subscribe(this.connected, this.client);
+          subscriber._setSubscribed(true);
           // }else{
           // value._setSubscribed(false);
           // value.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
@@ -238,20 +248,8 @@ Polymer({
   },
 
   /**
-   * fired when a message is read
+   * when a message is received transfert it to the subscribers
    *
-   * example of the `evt.detail` :
-   *
-   * ```
-   * {
-   *   topic: "terminal/hello",
-   *   payload: "polymer"
-   * }
-   * ```
-   *
-   * @event tsante-mqtt-received
-   * @param  {String} topic topic of the received message
-   * @param  {String} payload content of the received message
    */
   _onMessageArrived: function _onMessageArrived(msg) {
     var subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
@@ -261,9 +259,9 @@ Polymer({
 
     try {
       for (var _iterator3 = subscribers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-        var value = _step3.value;
+        var subscriber = _step3.value;
 
-        value.received(msg);
+        subscriber._received(msg);
       }
     } catch (err) {
       _didIteratorError3 = true;

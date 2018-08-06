@@ -10,7 +10,7 @@ Polymer({
      */
     topic: {
       type: String,
-      value: "#",
+      value: '#',
       observer: '_topicChanged'
     },
     /**
@@ -45,23 +45,62 @@ Polymer({
       readOnly: true,
       reflectToAttribute: true
     },
-    connected: {
+
+    _connected: {
       type: Boolean,
       observer: 'isConnected'
-    }
+    },
+    _client: Object
   },
 
   isConnected: function isConnected() {
-    if (!this.connected && this.subscribed) this.unsubscribe();
+    if (!this._connected && this.subscribed) this.unsubscribe();
   },
 
-  received: function received(msg) {
-    this.fire('tsante-mqtt-received', { topic: msg.destinationName, payload: msg.payloadString });
+  /**
+   * filter received messages
+   * 
+   * This method is called by the `tsante-mqtt` ancestor when a message is received
+   * 
+   *
+   * @param {destinationName, payloadString} msg
+   */
+  _received: function _received(msg) {
+    var rightTopic = void 0;
+    if (this.topic[this.topic.length - 1] === '#') {
+      var shortTopic = this.topic.split('/').slice(0, -1).join('');
+      rightTopic = msg.destinationName.split('/').slice(0, -1).join('').slice(0, shortTopic.length) === shortTopic;
+    }
+    if (rightTopic || msg.destinationName === this.topic) {
+      this._fireReceived({ topic: msg.destinationName, payload: msg.payloadString });
+    }
   },
 
-  setNeededProperties: function setNeededProperties(connected, client) {
-    this.client = client;
-    this.connected = connected;
+  /**
+   * fire an event on received message
+   * 
+   * example of the `evt.detail` :
+   *
+   * ```
+   * {
+   *   topic: "terminal/hello",
+   *   payload: "polymer"
+   * }
+   * ```
+   * 
+   * @event tsante-mqtt-received
+   * @param  {String} topic topic of the received message
+   * @param  {String} payload content of the received message
+   */
+  _fireReceived: function _fireReceived(_ref) {
+    var topic = _ref.topic,
+        payload = _ref.payload;
+
+    this.fire('tsante-mqtt-received', { topic: topic, payload: payload });
+  },
+
+  setNeededProperties: function setNeededProperties(connected) {
+    this._connected = connected;
   },
 
   /**
@@ -85,7 +124,11 @@ Polymer({
 
   /**
    * subscribe to the topic
+   * this method is called by the `tsante-mqtt`
    * @method subscribe
+   *
+   * @param {*} connected the connected status of the tsante-mqtt parent
+   * @param {*} client the mqtt client of the tsante-mqtt parent
    */
   subscribe: function subscribe(connected, client) {
     if (connected && !this.subscribed) {
