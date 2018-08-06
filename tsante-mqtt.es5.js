@@ -8,7 +8,7 @@ Polymer({
     /**
      * the url of the server
      *
-     * by exapmple :
+     * by example :
      * `ws://test.mosquitto.org:8080/`
      *
      * @type {String}
@@ -112,8 +112,43 @@ Polymer({
     }
   },
 
-  observers: ['_initializeClient(host,clientID)', 'connect(username, password)'],
+  observers: ['_sendInfoToPubSub(connected, client)', '_initializeClient(host,clientID)', 'connect(username, password)'],
 
+  /**
+   * on connected change or client change
+   * update publishers and subscribers children
+   * @method sendInfoToPubSub
+   *
+   * @param {*} connected
+   * @param {*} client
+   */
+  _sendInfoToPubSub: function _sendInfoToPubSub(connected, client) {
+    var pubSubs = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'));
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = pubSubs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var pubSub = _step.value;
+
+        pubSub.setNeededProperties(connected, client);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+  },
   attached: function attached() {
     this.connect();
   },
@@ -171,7 +206,40 @@ Polymer({
    * @param {Boolean} status the status of the connection
    */
   _connectedChanged: function _connectedChanged() {
-    this.fire('tsante-mqtt-connect', { status: this.connected });
+    var subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
+    if (this.connected) {
+      this.fire('tsante-mqtt-connect', { status: this.connected });
+    }
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = subscribers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var subscriber = _step2.value;
+
+        if (this.connected) {
+          subscriber.subscribe(this.connected, this.client);
+          subscriber._setSubscribed(true);
+          // }else{
+          // value._setSubscribed(false);
+          // value.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
+        }
+      }
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+          _iterator2.return();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
   },
 
   _onConnectionLost: function _onConnectionLost(msg) {
@@ -180,23 +248,35 @@ Polymer({
   },
 
   /**
-   * fired when a message is read
+   * when a message is received transfert it to the subscribers
    *
-   * example of the `evt.detail` :
-   *
-   * ```
-   * {
-   *   topic: "terminal/hello",
-   *   payload: "polymer"
-   * }
-   * ```
-   *
-   * @event tsante-mqtt-received
-   * @param  {String} topic topic of the received message
-   * @param  {String} payload content of the received message
    */
   _onMessageArrived: function _onMessageArrived(msg) {
-    this.fire('tsante-mqtt-received', { topic: msg.destinationName, payload: msg.payloadString });
+    var subscribers = [].slice.call(this.querySelectorAll('tsante-mqtt-subscriber'));
+    var _iteratorNormalCompletion3 = true;
+    var _didIteratorError3 = false;
+    var _iteratorError3 = undefined;
+
+    try {
+      for (var _iterator3 = subscribers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+        var subscriber = _step3.value;
+
+        subscriber._received(msg);
+      }
+    } catch (err) {
+      _didIteratorError3 = true;
+      _iteratorError3 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+          _iterator3.return();
+        }
+      } finally {
+        if (_didIteratorError3) {
+          throw _iteratorError3;
+        }
+      }
+    }
   },
 
   /**
@@ -222,7 +302,9 @@ Polymer({
      * @param {String} topic the topic
      * @param {String} payload the content of the message
      */
-    this.fire('tsante-mqtt-delivered', { topic: msg.destinationName, payload: msg.payloadString });
+    if (typeof msg.payloadString === 'string') {
+      this.fire('tsante-mqtt-delivered', { topic: msg.destinationName, payload: msg.payloadString });
+    }
   },
 
   /**
@@ -244,12 +326,13 @@ Polymer({
         cleanSession: _this.cleanSession
       };
       if (_this.username || username) {
+        _this.username = _this.username || username;
         connectOption.userName = _this.username || username;
       }
       if (_this.password || password) {
+        _this.password = _this.password || password;
         connectOption.password = _this.password || password;
       }
-
       try {
         _this.client.connect(connectOption);
       } catch (err) {
@@ -263,9 +346,11 @@ Polymer({
    * @method disconnect
    */
   disconnect: function disconnect() {
+    // if (!this.client) return;
     try {
       this.client.disconnect();
       this._setConnected(false);
+      this.fire('tsante-mqtt-connect', { status: this.connected });
     } catch (err) {
       this._onError(err.message);
     }

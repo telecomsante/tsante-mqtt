@@ -1,7 +1,23 @@
+# current
+
+- allow tsante-subscribers to be embed deeper, they doesn't need to be direct child of tsante-mqtt
+
+BREAKING CHANGE :
+
+`tsante-mqtt-received` events are fired by `tsante-mqtt-subscriber` elements.
+
+however as the events bubble it's always possible to get the events from the `tsante-mqtt` ancestor.
+In this case some events can appear to be emitted several time, but look at the evt.target it must be different.
+
+Internal :
+
+- send tsante-mqtt's connected and client properties to all tsante-mqtt-subscriber children
+
+
 # v1.3.0
 
   - fix #9 : Add timeout and qos options for subscriber
-
+  
 # v1.2.0
 
   - fix #7 : cannot publish the same payload when changing the topic

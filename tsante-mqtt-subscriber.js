@@ -8,7 +8,7 @@ Polymer({
      */
     topic: {
       type: String,
-      value: "#",
+      value: '#',
       observer: '_topicChanged'
     },
     /**
@@ -32,6 +32,7 @@ Polymer({
       type: Number,
       value: null
     },
+
     /**
      * set when subscribe is sucessful
      * @type {Boolean}
@@ -42,21 +43,60 @@ Polymer({
       readOnly: true,
       reflectToAttribute: true,
     },
+
+    _connected: {
+      type: Boolean,
+      observer: 'isConnected'
+    },
+    _client: Object,
   },
 
-  attached: function() {
-    if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
-      console.error('tsante-mqtt-subscriber must have a tsante-mqtt parent');
+
+  isConnected: function(){
+    if (!this._connected && this.subscribed) this.unsubscribe()
+  },
+  
+  /**
+   * filter received messages
+   * 
+   * This method is called by the `tsante-mqtt` ancestor when a message is received
+   * 
+   *
+   * @param {destinationName, payloadString} msg
+   */
+  _received: function(msg){
+    let rightTopic
+    if (this.topic[this.topic.length-1]==='#'){
+      let shortTopic = this.topic.split('/').slice(0,-1).join('');
+      rightTopic = msg.destinationName.split('/').slice(0,-1).join('').slice(0,shortTopic.length) === shortTopic;
     }
-    // when the parent is connected then subscribe to the topic
-    this.parentElement.addEventListener('tsante-mqtt-connect', (evt) => {
-      if(evt.detail.status) {
-        this._subscribe();
-      } else if(this.subscribed) {
-        this._setSubscribed(false);
-        this.fire('tsante-mqtt-subscribed', { topic: this.topic, status: false });
-      }
-    });
+    if (rightTopic || msg.destinationName === this.topic) {
+      this._fireReceived({ topic: msg.destinationName, payload: msg.payloadString });
+    }
+  },
+
+  /**
+   * fire an event on received message
+   * 
+   * example of the `evt.detail` :
+   *
+   * ```
+   * {
+   *   topic: "terminal/hello",
+   *   payload: "polymer"
+   * }
+   * ```
+   * 
+   * @event tsante-mqtt-received
+   * @param  {String} topic topic of the received message
+   * @param  {String} payload content of the received message
+   */
+  _fireReceived: function({topic, payload}) {
+    this.fire('tsante-mqtt-received', { topic, payload });
+  },
+
+  setNeededProperties: function(connected){
+     this._connected = connected;
   },
 
   /**
@@ -71,29 +111,30 @@ Polymer({
     if( newValue !== oldValue ){
       if(oldValue && this.subscribed) {
         this.unsubscribe(oldValue);
-        this.addEventListener('tsante-mqtt-subscribed', this._subscribe);
+        this.addEventListener('tsante-mqtt-subscribed', this.subscribe);
       } else {
-        this._subscribe();
+        this.subscribe();
       }
     }
   },
-
+  
   /**
    * subscribe to the topic
-   * @method _subscribe
+   * this method is called by the `tsante-mqtt`
+   * @method subscribe
+   *
+   * @param {*} connected the connected status of the tsante-mqtt parent
+   * @param {*} client the mqtt client of the tsante-mqtt parent
    */
-  _subscribe: function() {
-    if(this.parentElement.connected && !this.subscribed) {
-      this.removeEventListener('tsante-mqtt-subscribed', this._subscribe);
-      const subscribeOptions = {
+  subscribe: function(connected, client) {
+    if(connected && !this.subscribed) {
+      this.removeEventListener('tsante-mqtt-subscribed', this.subscribe);
+      client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic },
-      };
-      if(this.qos >= 0 && this.qos <= 2) { subscribeOptions['qos'] = this.qos; }
-      if(this.timeout) { subscribeOptions['timeout'] = this.timeout; }
-      this.parentElement.client.subscribe(this.topic, subscribeOptions);
-    }
+      });
+    };
   },
 
   /**
@@ -129,26 +170,8 @@ Polymer({
    * @param  {String}  topic the topic to unsubscribe (default this.topic )
    */
   unsubscribe: function(topic = this.topic) {
-    this.parentElement.client.unsubscribe(topic, {
-      onSuccess: this._onUnsubscribe.bind(this),
-      onFailure: this._onUnsubscribeFail.bind(this),
-      invocationContext: { topic: topic },
-    });
-  },
-
-  /**
-   * on successful unsubscribe send a `tsante-mqtt-subscribed` event
-   * @method _onUnsubscribe
-   * @param  {Object} evt
-   */
-  _onUnsubscribe: function(evt) {
     this._setSubscribed(false);
-    this.fire('tsante-mqtt-subscribed', { topic: evt.invocationContext.topic, status: false });
-  },
-
-  _onUnsubscribeFail: function(evt) {
-    this._setSubscribed(true);
-    this._onError(evt);
+    this.fire('tsante-mqtt-subscribed', { topic: topic, status: false });
   },
 
   /**

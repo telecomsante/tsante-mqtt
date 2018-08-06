@@ -25,6 +25,8 @@
   <div id="mocha"></div>
   <script>
     describe('tsante-mqtt es5 version', function() {
+      const mosquittoUrl = '127.0.0.1'
+      const mosquittoPort = '9883'
 
       afterEach(function() {
         try {
@@ -46,7 +48,7 @@
         expect(subscriber.subscribed).to.be.false;
       });
 
-      it('error when connecting to ws://:8080/', (done) => {
+      it(`error when connecting to ws://:${mosquittoPort}/`, (done) => {
         const element = fixture('basic');
 
         function check(evt) {
@@ -56,10 +58,10 @@
         }
 
         element.addEventListener('tsante-mqtt-error', check);
-        element.host = 'ws://:8080/';
+        element.host = `ws://:${mosquittoPort}/`;
       });
 
-      it('connect to ws://test.mosquitto.org:8080/', (done) => {
+      it(`connect to ws://${mosquittoUrl}:${mosquittoPort}/`, (done) => {
         const element = fixture('basic');
         element.addEventListener('tsante-mqtt-connect', (evt) => {
           expect(evt.detail.status).to.be.true;
@@ -67,7 +69,7 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('if already connected, on connect the component should throw an error', (done) => {
@@ -87,7 +89,7 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('disconnect', (done) => {
@@ -108,7 +110,7 @@
           }
         }
         element.addEventListener('tsante-mqtt-connect', check);
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('if already disconnected, on disconnect the component should throw an error', (done) => {
@@ -133,7 +135,7 @@
         }
         element.addEventListener('tsante-mqtt-connect', check);
         element.addEventListener('tsante-mqtt-error', onError);
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('subscriber should automatically subscribe on connect', (done) => {
@@ -147,7 +149,7 @@
         }, {
           once: true
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('subscriber should automatically be unsubscribed on disconnect', (done) => {
@@ -166,7 +168,7 @@
             done();
           }
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('publisher should automatically publish on connect', (done) => {
@@ -179,7 +181,7 @@
           expect(evt.detail.topic).to.be.equal('terminal/hello');
           done();
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
       it('subscriber should receive the published message', (done) => {
@@ -193,10 +195,10 @@
           expect(evt.detail.topic).to.be.equal('terminal/hello');
           done();
         });
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
-      it('test issue #4 regression', (done) => {
+      it('ensures that payload is always the last edited property, ( regression #4)', (done) => {
         const element = fixture('basic');
         const subscriber = element.querySelector('tsante-mqtt-subscriber');
         const publisher = element.querySelector('tsante-mqtt-publisher');
@@ -213,10 +215,10 @@
         };
         element.addEventListener('tsante-mqtt-delivered', listener);
         publisher.payload = '45';
-        element.host = 'ws://test.mosquitto.org:8080/';
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
       });
 
-      it('connection to wss://test.mosquitto.org:8081/', (done) => {
+      it('TLS connection to wss://test.mosquitto.org:8081/', (done) => {
         const element = fixture('basic');
         element.addEventListener('tsante-mqtt-connect', (evt) => {
           expect(evt.detail.status).to.be.true;
@@ -242,7 +244,7 @@
             done(false);
           }
         });
-        element.host = 'wss://127.0.0.1:8081/';
+        element.host = `ws://${mosquittoUrl}:8081/`;
       });
 
       it('test connection retry', (done) => {
@@ -262,7 +264,7 @@
           }
         });
         element.retry = 5
-        element.host = 'wss://127.0.0.1:8081/';
+        element.host = `ws://${mosquittoUrl}:8081/`;
       });
     });
   </script>

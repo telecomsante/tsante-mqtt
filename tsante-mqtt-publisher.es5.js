@@ -8,7 +8,7 @@ Polymer({
      * the topic to publish in
      *
      * when the topic is changed, the payload is changed to null.
-     * 
+     *
      * @type {String}
      */
     topic: {
@@ -40,26 +40,36 @@ Polymer({
     payload: {
       type: String,
       value: null
-    }
+    },
+    /**
+     * the connection status of the `tsante-mqtt` ancestor
+     * @type {Boolean}
+     */
+    _connected: {
+      type: Boolean,
+      value: false
+    },
+    /**
+     * the mqtt client of the `tsante-mqtt` ancestor
+     * @type {Object}
+     */
+    _client: Object
   },
 
-  observers: ['publish(payload)'],
+  observers: ['_isConnected(_connected)', 'publish(payload)'],
 
-  attached: function attached() {
-    var _this = this;
+  setNeededProperties: function setNeededProperties(connected, client) {
+    this._connected = connected;
+    this._client = client;
+  },
 
-    if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
-      console.error('tsante-mqtt-publisher must have a tsante-mqtt parent');
-    }
-    this.parentElement.addEventListener('tsante-mqtt-connect', function (evt) {
-      if (evt.detail.status && _this.payload) {
-        _this.publish();
-      }
-    });
+  _isConnected: function _isConnected(_connected) {
+    if (_connected && this._client) this.publish();
   },
 
   _topicChanged: function _topicChanged(newValue) {
     this.payload = null;
+    this.alreadyPublished = false;
   },
 
   /**
@@ -71,12 +81,12 @@ Polymer({
    * @param  {Boolean} retained flag indicates that the server must or not keep the value by default this.retained
    */
   publish: function publish(payload, qos, retained) {
-    if (this.parentElement.connected) {
-      payload = typeof payload === "string" ? payload : this.payload;
+    if (this._connected) {
+      payload = typeof payload === 'string' ? payload : this.payload;
       if (payload === null) return;
       qos = !qos || isNaN(qos) ? this.qos : qos;
       retained = typeof retained === 'boolean' ? retained : this.retained;
-      this.parentElement.client.send(this.topic, payload, qos, retained);
+      this._client.send(this.topic, payload, qos, retained);
     }
   }
 });

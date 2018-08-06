@@ -15,7 +15,7 @@ services:
         max-file: "5"
     volumes:
       - ./config:/etc/mosquitto
-      - mosquittoDB:/var/lib/mosquitto
+      - ./mosquittoDB:/var/lib/mosquitto
     ports:
       - 1883:1883
       - 9883:9883

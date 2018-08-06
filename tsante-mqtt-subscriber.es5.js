@@ -10,7 +10,7 @@ Polymer({
      */
     topic: {
       type: String,
-      value: "#",
+      value: '#',
       observer: '_topicChanged'
     },
     /**
@@ -22,7 +22,7 @@ Polymer({
      */
     qos: {
       type: Number,
-      value: 0
+      value: null
     },
     /**
      * timeout
@@ -34,6 +34,7 @@ Polymer({
       type: Number,
       value: null
     },
+
     /**
      * set when subscribe is sucessful
      * @type {Boolean}
@@ -43,24 +44,63 @@ Polymer({
       value: false,
       readOnly: true,
       reflectToAttribute: true
+    },
+
+    _connected: {
+      type: Boolean,
+      observer: 'isConnected'
+    },
+    _client: Object
+  },
+
+  isConnected: function isConnected() {
+    if (!this._connected && this.subscribed) this.unsubscribe();
+  },
+
+  /**
+   * filter received messages
+   * 
+   * This method is called by the `tsante-mqtt` ancestor when a message is received
+   * 
+   *
+   * @param {destinationName, payloadString} msg
+   */
+  _received: function _received(msg) {
+    var rightTopic = void 0;
+    if (this.topic[this.topic.length - 1] === '#') {
+      var shortTopic = this.topic.split('/').slice(0, -1).join('');
+      rightTopic = msg.destinationName.split('/').slice(0, -1).join('').slice(0, shortTopic.length) === shortTopic;
+    }
+    if (rightTopic || msg.destinationName === this.topic) {
+      this._fireReceived({ topic: msg.destinationName, payload: msg.payloadString });
     }
   },
 
-  attached: function attached() {
-    var _this = this;
+  /**
+   * fire an event on received message
+   * 
+   * example of the `evt.detail` :
+   *
+   * ```
+   * {
+   *   topic: "terminal/hello",
+   *   payload: "polymer"
+   * }
+   * ```
+   * 
+   * @event tsante-mqtt-received
+   * @param  {String} topic topic of the received message
+   * @param  {String} payload content of the received message
+   */
+  _fireReceived: function _fireReceived(_ref) {
+    var topic = _ref.topic,
+        payload = _ref.payload;
 
-    if (this.parentElement.tagName !== 'tsante-mqtt'.toUpperCase()) {
-      console.error('tsante-mqtt-subscriber must have a tsante-mqtt parent');
-    }
-    // when the parent is connected then subscribe to the topic
-    this.parentElement.addEventListener('tsante-mqtt-connect', function (evt) {
-      if (evt.detail.status) {
-        _this._subscribe();
-      } else if (_this.subscribed) {
-        _this._setSubscribed(false);
-        _this.fire('tsante-mqtt-subscribed', { topic: _this.topic, status: false });
-      }
-    });
+    this.fire('tsante-mqtt-received', { topic: topic, payload: payload });
+  },
+
+  setNeededProperties: function setNeededProperties(connected) {
+    this._connected = connected;
   },
 
   /**
@@ -75,33 +115,30 @@ Polymer({
     if (newValue !== oldValue) {
       if (oldValue && this.subscribed) {
         this.unsubscribe(oldValue);
-        this.addEventListener('tsante-mqtt-subscribed', this._subscribe);
+        this.addEventListener('tsante-mqtt-subscribed', this.subscribe);
       } else {
-        this._subscribe();
+        this.subscribe();
       }
     }
   },
 
   /**
    * subscribe to the topic
-   * @method _subscribe
+   * this method is called by the `tsante-mqtt`
+   * @method subscribe
+   *
+   * @param {*} connected the connected status of the tsante-mqtt parent
+   * @param {*} client the mqtt client of the tsante-mqtt parent
    */
-  _subscribe: function _subscribe() {
-    if (this.parentElement.connected && !this.subscribed) {
-      this.removeEventListener('tsante-mqtt-subscribed', this._subscribe);
-      var subscribeOptions = {
+  subscribe: function subscribe(connected, client) {
+    if (connected && !this.subscribed) {
+      this.removeEventListener('tsante-mqtt-subscribed', this.subscribe);
+      client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic }
-      };
-      if (this.qos >= 0 && this.qos <= 2) {
-        subscribeOptions['qos'] = this.qos;
-      }
-      if (this.timeout) {
-        subscribeOptions['timeout'] = this.timeout;
-      }
-      this.parentElement.client.subscribe(this.topic, subscribeOptions);
-    }
+      });
+    };
   },
 
   /**
@@ -138,26 +175,8 @@ Polymer({
   unsubscribe: function unsubscribe() {
     var topic = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.topic;
 
-    this.parentElement.client.unsubscribe(topic, {
-      onSuccess: this._onUnsubscribe.bind(this),
-      onFailure: this._onUnsubscribeFail.bind(this),
-      invocationContext: { topic: topic }
-    });
-  },
-
-  /**
-   * on successful unsubscribe send a `tsante-mqtt-subscribed` event
-   * @method _onUnsubscribe
-   * @param  {Object} evt
-   */
-  _onUnsubscribe: function _onUnsubscribe(evt) {
     this._setSubscribed(false);
-    this.fire('tsante-mqtt-subscribed', { topic: evt.invocationContext.topic, status: false });
-  },
-
-  _onUnsubscribeFail: function _onUnsubscribeFail(evt) {
-    this._setSubscribed(true);
-    this._onError(evt);
+    this.fire('tsante-mqtt-subscribed', { topic: topic, status: false });
   },
 
   /**
