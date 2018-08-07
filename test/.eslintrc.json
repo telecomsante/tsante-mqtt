@@ -1,0 +1,19 @@
+{
+  "env": {
+    "mocha": true
+  },
+  "plugins": [
+    "chai-expect"
+  ],
+  "rules": {
+    "chai-expect/missing-assertion": 2,
+    "chai-expect/terminating-properties": 1
+  },
+  "globals": {
+    "fixture": true,
+    "WCT": true,
+    "expect": true,
+    "sinon": true,
+    "assert": true
+  }
+}

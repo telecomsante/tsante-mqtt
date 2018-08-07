@@ -11,7 +11,7 @@ Polymer({
      */
     topic: {
       type: String,
-      observer: '_topicChanged',
+      observer: '_topicChanged'
     },
     /**
      * qos
@@ -21,7 +21,7 @@ Polymer({
      */
     qos: {
       type: Number,
-      value: 0,
+      value: 0
     },
     /**
      * retain flag
@@ -29,7 +29,7 @@ Polymer({
      */
     retained: {
       type: Boolean,
-      value: false,
+      value: false
     },
     /**
      * the payload to send
@@ -37,7 +37,7 @@ Polymer({
      */
     payload: {
       type: String,
-      value: null,
+      value: null
     },
     /**
      * the connection status of the `tsante-mqtt` ancestor
@@ -45,7 +45,7 @@ Polymer({
      */
     _connected: {
       type: Boolean,
-      value: false,
+      value: false
     },
     /**
      * the mqtt client of the `tsante-mqtt` ancestor
@@ -56,21 +56,21 @@ Polymer({
 
   observers: [
     '_isConnected(_connected)',
-    'publish(payload)',
+    'publish(payload)'
   ],
 
-  setNeededProperties: function(connected, client){
+  setNeededProperties: function (connected, client) {
     this._connected = connected
     this._client = client
   },
 
-  _isConnected: function(_connected){
-    if (_connected  && this._client) this.publish();
+  _isConnected: function (_connected) {
+    if (_connected && this._client) this.publish()
   },
 
-  _topicChanged: function(newValue) {
-    this.payload = null;
-    this.alreadyPublished = false;
+  _topicChanged: function (newValue) {
+    this.payload = null
+    this.alreadyPublished = false
   },
 
   /**
@@ -81,13 +81,13 @@ Polymer({
    * @param  {Number} qos the qos of the message (0,1,2) by default this.qos
    * @param  {Boolean} retained flag indicates that the server must or not keep the value by default this.retained
    */
-  publish: function(payload, qos, retained) {
-    if(this._connected) {
-      payload = typeof payload === 'string'?payload:this.payload;
-      if(payload === null) return;
-      qos = (!qos || isNaN(qos))?this.qos:qos;
-      retained = typeof retained === 'boolean'?retained:this.retained;
-      this._client.send(this.topic, payload, qos, retained);
+  publish: function (payload, qos, retained) {
+    if (this._connected) {
+      payload = typeof payload === 'string' ? payload : this.payload
+      if (payload === null) return
+      qos = (!qos || isNaN(qos)) ? this.qos : qos
+      retained = typeof retained === 'boolean' ? retained : this.retained
+      this._client.send(this.topic, payload, qos, retained)
     }
   }
-});
+})

@@ -39,69 +39,89 @@
 
       afterEach(function () {
         try {
-          document.getElementById('nested').restore();
+          document.getElementById('nested').restore()
         } catch (err) {
-          console.warn(err);
+          console.warn(err)
         }
-      });
+      })
 
       it('subscribers should automatically subscribe on connect', (done) => {
-        const element = fixture('nested');
+        const element = fixture('nested')
         const expected = [
-          { 
-            id: "subscriber1",
-            detail: {topic: "terminal/#", status: true} 
+          {
+            id: 'subscriber1',
+            detail: {
+              topic: 'terminal/#',
+              status: true
+            }
           },
-          { 
-            id: "subscriber2",
-            detail: {topic: "terminal/hello", status: true} 
+          {
+            id: 'subscriber2',
+            detail: {
+              topic: 'terminal/hello',
+              status: true
+            }
           },
-          { 
-            id: "subscriber3",
-            detail: {topic: "terminal/hello/world", status: true} 
-          },
+          {
+            id: 'subscriber3',
+            detail: {
+              topic: 'terminal/hello/world',
+              status: true
+            }
+          }
         ]
-        let count = 0
         const subscribedHandler = sinon.spy()
         element.addEventListener('tsante-mqtt-subscribed', subscribedHandler)
-        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
         setTimeout(() => {
           expect(subscribedHandler.callCount).to.equal(3)
           const events = subscribedHandler.getCalls()
-            .map(call => ({ id: call.args[0].target.id, detail: call.args[0].detail}))
+            .map(call => ({
+              id: call.args[0].target.id,
+              detail: call.args[0].detail
+            }))
           expect(events).to.eql(expected)
-          done()
-        }, 2000)
-      });
-
-      it('subscribers should received one message on reconnect', (done) => {
-        const element = fixture('nested');
-        const expected = [
-          { 
-            id: "subscriber1",
-            detail: {topic: "terminal/hello", payload: "world"}
-          },
-          { 
-            id: "subscriber2",
-            detail: {topic: "terminal/hello", payload: "world"} 
-          },
-        ]
-
-        const publisher = element.querySelector('tsante-mqtt-publisher');
-        publisher.payload = 'world'
-
-        const receiveHandler = sinon.spy()
-        element.addEventListener('tsante-mqtt-received', receiveHandler)
-        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`;
-        setTimeout(() => {
-          expect(receiveHandler.callCount).to.equal(2)
-          const events = receiveHandler.getCalls()
-            .map(call => ({ id: call.args[0].target.id, detail: call.args[0].detail})) 
           done()
         }, 2000)
       })
 
-    });
+      it('subscribers should received one message on reconnect', (done) => {
+        const element = fixture('nested')
+        const expected = [
+          {
+            id: 'subscriber1',
+            detail: {
+              topic: 'terminal/hello',
+              payload: 'world'
+            }
+          },
+          {
+            id: 'subscriber2',
+            detail: {
+              topic: 'terminal/hello',
+              payload: 'world'
+            }
+          }
+        ]
+
+        const publisher = element.querySelector('tsante-mqtt-publisher')
+        publisher.payload = 'world'
+
+        const receiveHandler = sinon.spy()
+        element.addEventListener('tsante-mqtt-received', receiveHandler)
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+        setTimeout(() => {
+          expect(receiveHandler.callCount).to.equal(2)
+          const events = receiveHandler.getCalls()
+            .map(call => ({
+              id: call.args[0].target.id,
+              detail: call.args[0].detail
+            }))
+          expect(events).to.eql(expected)
+          done()
+        }, 2000)
+      })
+    })
   </script>
 </body>
 

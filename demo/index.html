@@ -71,41 +71,43 @@
           </tsante-mqtt>
           <div id="debug2"></div>
           <script>
-          const demo2 = document.querySelector('#demo2');
-          // send q new messqge every 2 seconds
-          setInterval(() => {
-            demo2.$.publisher.payload = demo2.$.publisher.payload === 'polymer' ? 'world':'polymer';
-          }, 2000 );
-          demo2.deliveredHandler = evt => {
-            const div = document.createElement('div');
-            let content= `
-              <div class='datetime'>${(new Date()).toLocaleString()}</div>
-              <div class='type'>delivered</div>
-              <div class='topic'>${evt.detail.topic}</div>
-              <div class='payload'>${evt.detail.payload}</div>
-            `;
-            div.innerHTML = content;
-            if(demo2.$.debug2.firstChild) {
-              demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild);
-            } else {
-              demo2.$.debug2.appendChild(div);
+            const demo2 = document.querySelector('#demo2')
+            // send q new messqge every 2 seconds
+            setInterval(() => {
+              demo2.$.publisher.payload = demo2.$.publisher.payload === 'polymer' ? 'world' : 'polymer'
+            }, 2000)
+
+            demo2.deliveredHandler = evt => {
+              const div = document.createElement('div')
+              let content = `
+                <div class='datetime'>${(new Date()).toLocaleString()}</div>
+                <div class='type'>delivered</div>
+                <div class='topic'>${evt.detail.topic}</div>
+                <div class='payload'>${evt.detail.payload}</div>
+              `
+              div.innerHTML = content
+              if (demo2.$.debug2.firstChild) {
+                demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild)
+              } else {
+                demo2.$.debug2.appendChild(div)
+              }
             }
-          };
-          demo2.receiveHandler = evt => {
-            const div = document.createElement('div');
-            let content= `
+
+            demo2.receiveHandler = evt => {
+              const div = document.createElement('div')
+              let content = `
               <div class='datetime'>${(new Date()).toLocaleString()}</div>
               <div class='type'>received</div>
               <div class='topic'>${evt.detail.topic}</div>
               <div class='payload'>${evt.detail.payload}</div>
-            `;
-            div.innerHTML = content;
-            if(demo2.$.debug2.firstChild) {
-              demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild);
-            } else {
-              demo2.$.debug2.appendChild(div);
+              `
+              div.innerHTML = content
+              if (demo2.$.debug2.firstChild) {
+                demo2.$.debug2.insertBefore(div, demo2.$.debug2.firstChild)
+              } else {
+                demo2.$.debug2.appendChild(div)
+              }
             }
-          }
           </script>
         </template>
       </demo-snippet>
@@ -130,18 +132,19 @@
           </tsante-mqtt>
           <div id="debug"></div>
           <script>
+            const demo = document.querySelector('#demo')
             demo.receiveHandler = evt => {
-              const div = document.createElement('div');
+              const div = document.createElement('div')
               let content = `
                 <div class='datetime'>${(new Date()).toLocaleString()}</div>
                 <div class='topic'>${evt.detail.topic}</div>
                 <div class='payload'>${evt.detail.payload}</div>
-              `;
-              div.innerHTML = content;
-              if(demo.$.debug.firstChild) {
-                demo.$.debug.insertBefore(div, demo.$.debug.firstChild);
+              `
+              div.innerHTML = content
+              if (demo.$.debug.firstChild) {
+                demo.$.debug.insertBefore(div, demo.$.debug.firstChild)
               } else {
-                demo.$.debug.appendChild(div);
+                demo.$.debug.appendChild(div)
               }
             }
           </script>
