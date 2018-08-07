@@ -47,9 +47,9 @@ npm test
 
 ## npm scripts
 
-__npm run start:mosquitto__ : starts a MQTT server into a docker container
+__npm run mosquitto:start__ : starts a MQTT server into a docker container
 
-__npm run stop:mosquitto__ : stops the MQTT server
+__npm run mosquitto:stop__ : stops the MQTT server
 
 __npm test__ : starts the MQTT server and runs the test suites on all installed browsers.
 

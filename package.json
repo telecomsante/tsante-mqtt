@@ -4,13 +4,13 @@
   "scripts": {
     "postinstall": "bower install",
     "start": "polymer serve",
-    "test": "npm run start:mosquitto && npm run test:chrome && npm run test:firefox && npm run stop:mosquitto",
+    "test": "npm run mosquitto:start && npm run test:chrome && npm run test:firefox && npm run mosquitto:stop",
     "test:chrome": "polymer test -l chrome",
     "test:firefox": "polymer test -l firefox",
     "test:safari": "polymer test -l safari",
     "build-es5": "babel tsante-mqtt-subscriber.js -o tsante-mqtt-subscriber.es5.js && babel tsante-mqtt-publisher.js -o tsante-mqtt-publisher.es5.js && babel tsante-mqtt.js -o tsante-mqtt.es5.js",
-    "start:mosquitto": "docker-compose -f test/docker-compose.yml up -d",
-    "stop:mosquitto": "docker-compose -f test/docker-compose.yml down",
+    "mosquitto:start": "docker-compose -f test/docker-compose.yml up -d",
+    "mosquitto:stop": "docker-compose -f test/docker-compose.yml down",
     "lint:javascript": "eslint . --ext html,js",
     "lint:polymer": "polymer lint",
     "lint": "npm run lint:javascript && npm run lint:polymer"
