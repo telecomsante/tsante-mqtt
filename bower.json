@@ -1,6 +1,6 @@
 {
   "name": "tsante-mqtt",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "A MQTT component",
   "license": "LICENSE.md",
   "main": "tsante-mqtt.html",
