@@ -1,4 +1,4 @@
-# current
+# 1.4.0
 
 - allow tsante-subscribers to be embed deeper, they doesn't need to be direct child of tsante-mqtt
 

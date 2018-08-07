@@ -27,13 +27,37 @@ the localstorage, to see a demo please consult the demo link below.
 ```html
 <tsante-mqtt host="ws://test.mosquitto.org:8080/" >
   <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
-  <tsante-mqtt-publisher id="publisher" topic="terminal/hello" payload="polymer" ></tsante-mqtt-subscriber>
+  <tsante-mqtt-publisher id="publisher"
+    topic="terminal/hello"
+    payload="polymer"></tsante-mqtt-publisher>
 </tsante-mqtt>
 ```
 
 The component is licensed under the [ISC License](LICENSE.md)
 
 Demo and doc are available on https://telecomsante.github.io/tsante-mqtt/
+
+### version 1.4.0 and above
+
+starting 1.4.0, it's possible to embed more deeper susbscribers and publishers
+
+```html
+<tsante-mqtt host="ws://test.mosquitto.org:8080/" >
+  <div>
+    <tsante-mqtt-subscriber topic="terminal/hello"></tsante-mqtt-subscriber>
+    <tsante-mqtt-publisher id="publisher"
+      topic="terminal/hello"
+      payload="polymer"></tsante-mqtt-publisher>
+  </div>
+</tsante-mqtt>
+```
+
+> BREAKING CHANGE :
+>
+> `tsante-mqtt-received` events are fired by `tsante-mqtt-subscriber` elements rather than by `tsante-mqtt`
+>
+> however as the events bubble it's always possible to get the events from the `tsante-mqtt` ancestor. In this case some events can appear to be emitted several time, but look at the evt.target it must be different.
+
 
 ## Running tests
 
