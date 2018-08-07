@@ -1,0 +1,10 @@
+{
+    "extends": "standard",
+    "plugins": [
+      "html"
+    ],
+    "globals": {
+      "Polymer": true,
+      "Paho": true
+    }
+}

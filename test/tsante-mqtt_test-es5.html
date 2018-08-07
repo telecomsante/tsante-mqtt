@@ -16,255 +16,250 @@
 <body>
   <test-fixture id="basic">
     <template>
-        <tsante-mqtt>
-          <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
-          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
-        </tsante-mqtt>
-      </template>
+      <tsante-mqtt>
+        <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+        <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+      </tsante-mqtt>
+    </template>
   </test-fixture>
   <div id="mocha"></div>
   <script>
-    describe('tsante-mqtt es5 version', function() {
+    describe('tsante-mqtt es5 version', function () {
+      const mosquittoUrl = '127.0.0.1'
+      const mosquittoPort = '9883'
 
-      afterEach(function() {
+      afterEach(function () {
         try {
-          document.getElementById('basic').restore();
+          document.getElementById('basic').restore()
         } catch (err) {
-          console.warn('can\'t restore');
+          console.warn('can\'t restore')
         }
-      });
+      })
 
-      it('instantiating the element works', function() {
-        const element = fixture('basic');
-        assert.equal(element.is, 'tsante-mqtt');
-      });
+      it('instantiating the element works', function () {
+        const element = fixture('basic')
+        assert.equal(element.is, 'tsante-mqtt')
+      })
 
       it('the component is not connected', () => {
-        const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
-        expect(element.connected).to.be.false;
-        expect(subscriber.subscribed).to.be.false;
-      });
+        const element = fixture('basic')
+        const subscriber = element.querySelector('tsante-mqtt-subscriber')
+        expect(element.connected).to.equal(false)
+        expect(subscriber.subscribed).to.equal(false)
+      })
 
-      it('error when connecting to ws://:8080/', (done) => {
-        const element = fixture('basic');
+      it(`error when connecting to ws://:${mosquittoPort}/`, (done) => {
+        const element = fixture('basic')
 
-        function check(evt) {
-          element.removeEventListener('tsante-mqtt-error', check);
-          expect(evt.detail).to.be.a.string;
-          done();
+        function check (evt) {
+          element.removeEventListener('tsante-mqtt-error', check)
+          expect(evt.detail).to.be.a.string // eslint-disable-line
+          done()
         }
 
-        element.addEventListener('tsante-mqtt-error', check);
-        element.host = 'ws://:8080/';
-      });
+        element.addEventListener('tsante-mqtt-error', check)
+        element.host = `ws://:${mosquittoPort}/`
+      })
 
-      it('connect to ws://test.mosquitto.org:8080/', (done) => {
-        const element = fixture('basic');
+      it(`connect to ws://${mosquittoUrl}:${mosquittoPort}/`, (done) => {
+        const element = fixture('basic')
         element.addEventListener('tsante-mqtt-connect', (evt) => {
-          expect(evt.detail.status).to.be.true;
-          done();
+          expect(evt.detail.status).to.equal(true)
+          done()
         }, {
           once: true
-        });
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+        })
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
       it('if already connected, on connect the component should throw an error', (done) => {
-        const element = fixture('basic');
-        let count = 0;
+        const element = fixture('basic')
+        let count = 0
         element.addEventListener('tsante-mqtt-connect', (evt) => {
           if (!count) {
-            expect(evt.detail.status).to.be.true;
-            element.connect();
+            expect(evt.detail.status).to.equal(true)
+            element.connect()
           }
         }, {
           once: true
-        });
+        })
         element.addEventListener('tsante-mqtt-error', (evt) => {
-          expect(evt.detail).to.be.equal('AMQJS0011E Invalid state already connected.');
-          done();
+          expect(evt.detail).to.be.equal('AMQJS0011E Invalid state already connected.')
+          done()
         }, {
           once: true
-        });
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+        })
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
       it('disconnect', (done) => {
-        const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
-        let count = 0;
+        const element = fixture('basic')
+        let count = 0
 
-        function check(evt) {
+        function check (evt) {
           if (!count) {
-            count++;
-            expect(evt.detail.status).to.be.true;
-            element.disconnect();
+            count++
+            expect(evt.detail.status).to.equal(true)
+            element.disconnect()
           } else {
-            element.removeEventListener('tsante-mqtt-connect', check);
-            expect(evt.detail.status).to.be.false;
-            expect(element.connected).to.be.false;
-            done();
+            element.removeEventListener('tsante-mqtt-connect', check)
+            expect(evt.detail.status).to.equal(false)
+            expect(element.connected).to.equal(false)
+            done()
           }
         }
-        element.addEventListener('tsante-mqtt-connect', check);
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+        element.addEventListener('tsante-mqtt-connect', check)
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
       it('if already disconnected, on disconnect the component should throw an error', (done) => {
-        const element = fixture('basic');
-        let count = 0;
+        const element = fixture('basic')
+        let count = 0
 
-        function check(evt) {
+        function check (evt) {
           if (!count) {
-            count++;
-            expect(evt.detail.status).to.be.true;
-            element.disconnect();
+            count++
+            expect(evt.detail.status).to.equal(true)
+            element.disconnect()
           } else {
-            element.disconnect();
+            element.disconnect()
           }
         }
 
-        function onError(evt) {
-          element.removeEventListener('tsante-mqtt-connect', check);
-          element.removeEventListener('tsante-mqtt-error', onError);
-          expect(evt.detail).to.be.equal('AMQJS0011E Invalid state not connecting or connected.');
-          done();
+        function onError (evt) {
+          element.removeEventListener('tsante-mqtt-connect', check)
+          element.removeEventListener('tsante-mqtt-error', onError)
+          expect(evt.detail).to.be.equal('AMQJS0011E Invalid state not connecting or connected.')
+          done()
         }
-        element.addEventListener('tsante-mqtt-connect', check);
-        element.addEventListener('tsante-mqtt-error', onError);
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+        element.addEventListener('tsante-mqtt-connect', check)
+        element.addEventListener('tsante-mqtt-error', onError)
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
       it('subscriber should automatically subscribe on connect', (done) => {
-        const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
+        const element = fixture('basic')
+        const subscriber = element.querySelector('tsante-mqtt-subscriber')
         subscriber.addEventListener('tsante-mqtt-subscribed', (evt) => {
-          expect(evt.detail.status).to.be.true;
-          expect(evt.detail.topic).to.be.equal('terminal/#');
-          expect(subscriber.subscribed).to.be.true;
-          done();
+          expect(evt.detail.status).to.equal(true)
+          expect(evt.detail.topic).to.be.equal('terminal/#')
+          expect(subscriber.subscribed).to.equal(true)
+          done()
         }, {
           once: true
-        });
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+        })
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
       it('subscriber should automatically be unsubscribed on disconnect', (done) => {
-        const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
-        let count = 0;
+        const element = fixture('basic')
+        const subscriber = element.querySelector('tsante-mqtt-subscriber')
+        let count = 0
         subscriber.addEventListener('tsante-mqtt-subscribed', (evt) => {
           if (!count) {
-            count++;
-            expect(evt.detail.status).to.be.true;
-            setTimeout(element.disconnect(), 200);
+            count++
+            expect(evt.detail.status).to.equal(true)
+            setTimeout(element.disconnect(), 200)
           } else {
-            expect(evt.detail.status).to.be.false;
-            expect(evt.detail.topic).to.be.equal('terminal/#');
-            expect(subscriber.subscribed).to.be.false;
-            done();
+            expect(evt.detail.status).to.equal(false)
+            expect(evt.detail.topic).to.be.equal('terminal/#')
+            expect(subscriber.subscribed).to.equal(false)
+            done()
           }
-        });
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+        })
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
       it('publisher should automatically publish on connect', (done) => {
-        const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
-        const publisher = element.querySelector('tsante-mqtt-publisher');
-        publisher.payload = 'world';
+        const element = fixture('basic')
+        const publisher = element.querySelector('tsante-mqtt-publisher')
+        publisher.payload = 'world'
         element.addEventListener('tsante-mqtt-delivered', (evt) => {
-          expect(evt.detail.payload).to.be.equal('world');
-          expect(evt.detail.topic).to.be.equal('terminal/hello');
-          done();
-        });
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+          expect(evt.detail.payload).to.be.equal('world')
+          expect(evt.detail.topic).to.be.equal('terminal/hello')
+          done()
+        })
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
       it('subscriber should receive the published message', (done) => {
-        const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
-        const publisher = element.querySelector('tsante-mqtt-publisher');
-        let count = 0;
-        publisher.payload = 'world';
+        const element = fixture('basic')
+        const publisher = element.querySelector('tsante-mqtt-publisher')
+        publisher.payload = 'world'
         element.addEventListener('tsante-mqtt-received', (evt) => {
-          expect(evt.detail.payload).to.be.equal('world');
-          expect(evt.detail.topic).to.be.equal('terminal/hello');
-          done();
-        });
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+          expect(evt.detail.payload).to.be.equal('world')
+          expect(evt.detail.topic).to.be.equal('terminal/hello')
+          done()
+        })
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
-      it('test issue #4 regression', (done) => {
-        const element = fixture('basic');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
-        const publisher = element.querySelector('tsante-mqtt-publisher');
+      it('ensures that payload is always the last edited property, ( regression #4)', (done) => {
+        const element = fixture('basic')
+        const publisher = element.querySelector('tsante-mqtt-publisher')
         const listener = (evt) => {
-          element.removeEventListener('tsante-mqtt-delivered', listener);
-          expect(evt.detail.payload).to.be.equal('45');
-          expect(evt.detail.topic).to.be.equal('terminal/hello');
+          element.removeEventListener('tsante-mqtt-delivered', listener)
+          expect(evt.detail.payload).to.be.equal('45')
+          expect(evt.detail.topic).to.be.equal('terminal/hello')
           element.addEventListener('tsante-mqtt-delivered', (evt) => {
-            expect(evt.detail.payload).to.be.equal('world');
-            expect(evt.detail.topic).to.be.equal('terminal/hello');
-            done();
-          });
-          publisher.payload = 'world';
-        };
-        element.addEventListener('tsante-mqtt-delivered', listener);
-        publisher.payload = '45';
-        element.host = 'ws://test.mosquitto.org:8080/';
-      });
+            expect(evt.detail.payload).to.be.equal('world')
+            expect(evt.detail.topic).to.be.equal('terminal/hello')
+            done()
+          })
+          publisher.payload = 'world'
+        }
+        element.addEventListener('tsante-mqtt-delivered', listener)
+        publisher.payload = '45'
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+      })
 
-      it('connection to wss://test.mosquitto.org:8081/', (done) => {
-        const element = fixture('basic');
+      it('TLS connection to wss://test.mosquitto.org:8081/', (done) => {
+        const element = fixture('basic')
         element.addEventListener('tsante-mqtt-connect', (evt) => {
-          expect(evt.detail.status).to.be.true;
-          done();
+          expect(evt.detail.status).to.equal(true)
+          done()
         }, {
           once: true
-        });
-        element.host = 'wss://test.mosquitto.org:8081/';
-      });
+        })
+        element.host = 'wss://test.mosquitto.org:8081/'
+      })
 
       it('test connection should not retry by default', (done) => {
-        this.timeout(0);
-        const element = fixture('basic');
-        let count = 0;
-        let start;
+        this.timeout(0)
+        const element = fixture('basic')
+        let count = 0
         element.addEventListener('tsante-mqtt-connect-error', (evt) => {
-          expect(evt.detail.message).to.be.equal('fail to connect');
-          expect(evt.detail.status).to.be.false;
+          expect(evt.detail.message).to.be.equal('fail to connect')
+          expect(evt.detail.status).to.equal(false)
           if (!count++) {
-            start = Math.floor(Date.now() / 1000);
-            setTimeout(done, 7000);
+            setTimeout(done, 7000)
           } else {
-            done(false);
+            done(false)
           }
-        });
-        element.host = 'wss://127.0.0.1:8081/';
-      });
+        })
+        element.host = `ws://${mosquittoUrl}:8081/`
+      })
 
       it('test connection retry', (done) => {
-        this.timeout(0);
-        const element = fixture('basic');
-        let count = 0;
-        let start;
+        this.timeout(0)
+        const element = fixture('basic')
+        let count = 0
+        let start
         element.addEventListener('tsante-mqtt-connect-error', (evt) => {
-          expect(evt.detail.message).to.be.equal('fail to connect');
-          expect(evt.detail.status).to.be.false;
+          expect(evt.detail.message).to.be.equal('fail to connect')
+          expect(evt.detail.status).to.equal(false)
           if (!count++) {
-            start = Math.floor(Date.now() / 1000);
+            start = Math.floor(Date.now() / 1000)
           } else {
-            const end = Math.floor(Date.now() / 1000);
-            expect(end - start).to.be.at.least(5);
-            done();
+            const end = Math.floor(Date.now() / 1000)
+            expect(end - start).to.be.at.least(5)
+            done()
           }
-        });
+        })
         element.retry = 5
-        element.host = 'wss://127.0.0.1:8081/';
-      });
-    });
+        element.host = `ws://${mosquittoUrl}:8081/`
+      })
+    })
   </script>
 </body>
 

@@ -1,3 +1,5 @@
+mqttws31.js
 bower_components/
 node_modules/
-test/mosquittoDB
+demo/
+*.es5.js

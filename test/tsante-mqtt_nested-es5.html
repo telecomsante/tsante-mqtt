@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>tsante-mqtt test</title>
+
+  <script src="../bower_components/sinonjs/sinon.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../tsante-mqtt.es5.html">
+</head>
+
+<body>
+  <test-fixture id="nested">
+    <template>
+      <tsante-mqtt>
+        <div>
+          <tsante-mqtt-subscriber id="subscriber1" topic="terminal/#"></tsante-mqtt-subscriber>
+          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+        </div>
+        <div>
+          <tsante-mqtt-subscriber id="subscriber2" topic="terminal/hello"></tsante-mqtt-subscriber>
+          <tsante-mqtt-subscriber id="subscriber3" topic="terminal/hello/world"></tsante-mqtt-subscriber>
+        </div>
+      </tsante-mqtt>
+    </template>
+  </test-fixture>
+
+  <div id="mocha"></div>
+
+  <script>
+    describe('tsante-mqtt nested subscribers', function () {
+      const mosquittoUrl = '127.0.0.1'
+      const mosquittoPort = '9883'
+
+      afterEach(function () {
+        try {
+          document.getElementById('nested').restore()
+        } catch (err) {
+          console.warn(err)
+        }
+      })
+
+      it('subscribers should automatically subscribe on connect', (done) => {
+        const element = fixture('nested')
+        const expected = [
+          {
+            id: 'subscriber1',
+            detail: {
+              topic: 'terminal/#',
+              status: true
+            }
+          },
+          {
+            id: 'subscriber2',
+            detail: {
+              topic: 'terminal/hello',
+              status: true
+            }
+          },
+          {
+            id: 'subscriber3',
+            detail: {
+              topic: 'terminal/hello/world',
+              status: true
+            }
+          }
+        ]
+        const subscribedHandler = sinon.spy()
+        element.addEventListener('tsante-mqtt-subscribed', subscribedHandler)
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+        setTimeout(() => {
+          expect(subscribedHandler.callCount).to.equal(3)
+          const events = subscribedHandler.getCalls()
+            .map(call => ({
+              id: call.args[0].target.id,
+              detail: call.args[0].detail
+            }))
+          expect(events).to.eql(expected)
+          done()
+        }, 2000)
+      })
+
+      it('subscribers should received one message on reconnect', (done) => {
+        const element = fixture('nested')
+        const expected = [
+          {
+            id: 'subscriber1',
+            detail: {
+              topic: 'terminal/hello',
+              payload: 'world'
+            }
+          },
+          {
+            id: 'subscriber2',
+            detail: {
+              topic: 'terminal/hello',
+              payload: 'world'
+            }
+          }
+        ]
+
+        const publisher = element.querySelector('tsante-mqtt-publisher')
+        publisher.payload = 'world'
+
+        const receiveHandler = sinon.spy()
+        element.addEventListener('tsante-mqtt-received', receiveHandler)
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+        setTimeout(() => {
+          expect(receiveHandler.callCount).to.equal(2)
+          const events = receiveHandler.getCalls()
+            .map(call => ({
+              id: call.args[0].target.id,
+              detail: call.args[0].detail
+            }))
+          expect(events).to.eql(expected)
+          done()
+        }, 2000)
+      })
+    })
+  </script>
+</body>
+
+</html>

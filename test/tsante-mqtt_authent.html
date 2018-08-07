@@ -16,130 +16,147 @@
 <body>
   <test-fixture id="auth">
     <template>
-        <tsante-mqtt>
-          <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
-          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
-        </tsante-mqtt>
-      </template>
+      <tsante-mqtt>
+        <tsante-mqtt-subscriber topic="terminal/#"></tsante-mqtt-subscriber>
+        <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+      </tsante-mqtt>
+    </template>
   </test-fixture>
   <div id="mocha"></div>
   <script>
-    describe('tsante-mqtt authentication', function() {
-      afterEach(function() {
+    describe('tsante-mqtt authentication', function () {
+      const mosquittoUrl = '127.0.0.1'
+      const mosquittoPort = '9883'
+
+      afterEach(function () {
         try {
-          document.getElementById('auth').restore();
+          document.getElementById('auth').restore()
         } catch (err) {
-          console.warn(err);
+          console.warn(err)
         }
-      });
+      })
 
       it('the component is not connected', () => {
-        const element = fixture('auth');
-        const subscriber = element.querySelector('tsante-mqtt-subscriber');
-        expect(element.connected).to.be.false;
-        expect(subscriber.subscribed).to.be.false;
-      });
+        const element = fixture('auth')
+        const subscriber = element.querySelector('tsante-mqtt-subscriber')
+        expect(element.connected).to.equal(false)
+        expect(subscriber.subscribed).to.equal(false)
+      })
 
       it('bad password', (done) => {
-        const element = fixture('auth');
-        element.username = 'admin';
-        element.password = 'test';
-        element.host = 'ws://localhost:9883/';
+        const element = fixture('auth')
+        element.username = 'admin'
+        element.password = 'test'
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
 
-        function check(evt) {
-          element.removeEventListener('tsante-mqtt-connect-error', check);
-          expect(evt.detail.status).to.be.false;
-          expect(evt.detail.message).to.be.equal("fail to connect");
-          done();
+        function check (evt) {
+          element.removeEventListener('tsante-mqtt-connect-error', check)
+          expect(evt.detail.status).to.equal(false)
+          expect(evt.detail.message).to.be.equal('fail to connect')
+          done()
         };
         element.addEventListener('tsante-mqtt-connect-error', check, {
           once: true
-        });
-      });
+        })
+      })
+
+      it('bad login', (done) => {
+        const element = fixture('auth')
+        element.username = 'test'
+        element.password = 'admin'
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+
+        function check (evt) {
+          element.removeEventListener('tsante-mqtt-connect-error', check)
+          expect(evt.detail.status).to.equal(false)
+          expect(evt.detail.message).to.be.equal('fail to connect')
+          done()
+        };
+        element.addEventListener('tsante-mqtt-connect-error', check)
+      })
 
       it('connect as admin', (done) => {
-        const element = fixture('auth');
-        element.username = 'admin';
-        element.password = 'admin';
-        element.host = 'ws://localhost:9883/';
+        const element = fixture('auth')
+        element.username = 'admin'
+        element.password = 'admin'
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
 
-        function check(evt) {
-          element.removeEventListener('tsante-mqtt-connect', check);
-          expect(evt.detail.status).to.be.true;
-          done();
+        function check (evt) {
+          element.removeEventListener('tsante-mqtt-connect', check)
+          expect(evt.detail.status).to.equal(true)
+          done()
         };
         element.addEventListener('tsante-mqtt-connect', check, {
           once: true
-        });
-      });
+        })
+      })
 
       it('debounce connect as admin', (done) => {
-        const element = fixture('auth');
-        element.username = 'admin';
-        element.password = 'test';
-        element.host = 'ws://localhost:9883/';
+        const element = fixture('auth')
+        element.username = 'admin'
+        element.password = 'test'
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
 
         setTimeout(() => {
           element.password = 'admin'
-        }, 10);
+        }, 10)
 
-        function check(evt) {
-          element.removeEventListener('tsante-mqtt-connect', check);
-          expect(evt.detail.status).to.be.true;
-          done();
+        function check (evt) {
+          element.removeEventListener('tsante-mqtt-connect', check)
+          expect(evt.detail.status).to.equal(true)
+          done()
         };
         element.addEventListener('tsante-mqtt-connect', check, {
           once: true
-        });
-      });
+        })
+      })
 
       it('write as admin', (done) => {
-        const element = fixture('auth');
-        const publisher = element.querySelector('tsante-mqtt-publisher');
-        element.username = 'admin';
-        element.password = 'admin';
-        element.host = 'ws://localhost:9883/';
+        const element = fixture('auth')
+        const publisher = element.querySelector('tsante-mqtt-publisher')
+        element.username = 'admin'
+        element.password = 'admin'
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
 
-        function check(evt) {
-          element.removeEventListener('tsante-mqtt-connect', check);
-          expect(evt.detail.status).to.be.true;
-          publisher.payload = 'world';
+        function check (evt) {
+          element.removeEventListener('tsante-mqtt-connect', check)
+          expect(evt.detail.status).to.equal(true)
+          publisher.payload = 'world'
         };
         element.addEventListener('tsante-mqtt-connect', check, {
           once: true
-        });
+        })
         element.addEventListener('tsante-mqtt-received', (evt) => {
-          expect(evt.detail.topic).to.be.equal('terminal/hello');
-          expect(evt.detail.payload).to.be.equal('world');
-          done();
+          expect(evt.detail.topic).to.be.equal('terminal/hello')
+          expect(evt.detail.payload).to.be.equal('world')
+          done()
         }, {
           once: true
-        });
-      });
+        })
+      })
 
       it('write as anonymous', (done) => {
-        const element = fixture('auth');
-        const publisher = element.querySelector('tsante-mqtt-publisher');
+        const element = fixture('auth')
+        const publisher = element.querySelector('tsante-mqtt-publisher')
 
-        function check(evt) {
-          element.removeEventListener('tsante-mqtt-connect', check);
-          expect(evt.detail.status).to.be.true;
-          publisher.payload = 'world';
+        function check (evt) {
+          element.removeEventListener('tsante-mqtt-connect', check)
+          expect(evt.detail.status).to.equal(true)
+          publisher.payload = 'world'
         };
         element.addEventListener('tsante-mqtt-connect', check, {
           once: true
-        });
+        })
         element.addEventListener('tsante-mqtt-connect-error', (evt) => {
-          done(false);
-        });
+          done(false)
+        })
         element.addEventListener('tsante-mqtt-received', (evt) => {
-          done(false);
-        });
-        element.host = 'ws://localhost:9883/';
-        setTimeout(done, 7000);
-      });
-
-    });
+          done(false)
+        })
+        element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
+        setTimeout(done, 7000)
+      })
+    })
   </script>
 </body>
 
