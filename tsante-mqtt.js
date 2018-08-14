@@ -92,7 +92,6 @@ Polymer({
      */
     client: {
       type: Object,
-      notify: true
     },
 
     /**
@@ -125,7 +124,9 @@ Polymer({
   _sendInfoToPubSub (connected, client) {
     let pubSubs = [].slice.call(this.querySelectorAll('tsante-mqtt-publisher, tsante-mqtt-subscriber'))
     for (let pubSub of pubSubs) {
-      pubSub.setNeededProperties(connected, client)
+      if (typeof pubSub.setNeededProperties === 'function') {
+        pubSub.setNeededProperties(connected, client)
+      }
     }
   },
 
