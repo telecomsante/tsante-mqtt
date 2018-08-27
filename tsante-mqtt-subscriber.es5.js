@@ -59,9 +59,9 @@ Polymer({
 
   /**
    * filter received messages
-   * 
+   *
    * This method is called by the `tsante-mqtt` ancestor when a message is received
-   * 
+   *
    *
    * @param {destinationName, payloadString} msg
    */
@@ -78,7 +78,7 @@ Polymer({
 
   /**
    * fire an event on received message
-   * 
+   *
    * example of the `evt.detail` :
    *
    * ```
@@ -87,7 +87,7 @@ Polymer({
    *   payload: "polymer"
    * }
    * ```
-   * 
+   *
    * @event tsante-mqtt-received
    * @param  {String} topic topic of the received message
    * @param  {String} payload content of the received message
