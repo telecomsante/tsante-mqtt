@@ -234,18 +234,19 @@
         const subscriber = element.querySelector('tsante-mqtt-subscriber')
         const oldValue = subscriber.topic
         const newValue = 'terminal/titi'
+
         subscriber.addEventListener('tsante-mqtt-subscribed', (evt) => {
           // Subscription
           expect(evt.detail.status).to.equal(true)
           expect(subscriber.subscribed).to.equal(true)
           expect(subscriber.topic).to.equal(oldValue)
-          
+
           subscriber.addEventListener('tsante-mqtt-subscribed', (evt) => {
             // Unsubscribe from old topic
             expect(evt.detail.status).to.equal(false)
             expect(subscriber.subscribed).to.equal(false)
             expect(subscriber.topic).to.equal(newValue)
-            
+
             subscriber.addEventListener('tsante-mqtt-subscribed', (evt) => {
               // Subscribe to the new topic
               expect(evt.detail.status).to.equal(true)
@@ -254,8 +255,7 @@
               done()
             }, { once: true })
           }, { once: true })
-          
-          setTimeout(() => subscriber.topic = newValue, 300)
+          setTimeout(() => { subscriber.topic = newValue }, 300)
         }, { once: true })
         element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
       })
