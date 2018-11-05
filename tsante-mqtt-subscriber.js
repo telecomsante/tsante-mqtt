@@ -51,6 +51,14 @@ Polymer({
     _client: Object,
   },
 
+  attached: function () {
+    let parent = this.parentElement
+    while (['tsante-mqtt', 'body'].indexOf(parent.tagName.toLowerCase()) === -1) {
+      parent = parent.parentElement
+    }
+    this.subscribe(parent.connected, parent.client)
+  },
+
   isConnected: function () {
     if (!this._connected && this.subscribed) this.unsubscribe()
   },
