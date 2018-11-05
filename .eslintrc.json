@@ -6,5 +6,9 @@
     "globals": {
       "Polymer": true,
       "Paho": true
+    },
+    "rules": {
+      "comma-dangle": ["error", "always-multiline"],
+      "semi": ["error", "never", { "beforeStatementContinuationChars": "always"}]
     }
 }

@@ -52,23 +52,23 @@
             id: 'subscriber1',
             detail: {
               topic: 'terminal/#',
-              status: true
-            }
+              status: true,
+            },
           },
           {
             id: 'subscriber2',
             detail: {
               topic: 'terminal/hello',
-              status: true
-            }
+              status: true,
+            },
           },
           {
             id: 'subscriber3',
             detail: {
               topic: 'terminal/hello/world',
-              status: true
-            }
-          }
+              status: true,
+            },
+          },
         ]
         const subscribedHandler = sinon.spy()
         element.addEventListener('tsante-mqtt-subscribed', subscribedHandler)
@@ -78,7 +78,7 @@
           const events = subscribedHandler.getCalls()
             .map(call => ({
               id: call.args[0].target.id,
-              detail: call.args[0].detail
+              detail: call.args[0].detail,
             }))
           expect(events).to.eql(expected)
           done()
@@ -92,16 +92,16 @@
             id: 'subscriber1',
             detail: {
               topic: 'terminal/hello',
-              payload: 'world'
-            }
+              payload: 'world',
+            },
           },
           {
             id: 'subscriber2',
             detail: {
               topic: 'terminal/hello',
-              payload: 'world'
-            }
-          }
+              payload: 'world',
+            },
+          },
         ]
 
         const publisher = element.querySelector('tsante-mqtt-publisher')
@@ -115,7 +115,7 @@
           const events = receiveHandler.getCalls()
             .map(call => ({
               id: call.args[0].target.id,
-              detail: call.args[0].detail
+              detail: call.args[0].detail,
             }))
           expect(events).to.eql(expected)
           done()

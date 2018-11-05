@@ -86,7 +86,7 @@
         }
 
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
       })
     
@@ -107,7 +107,7 @@
         }
 
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
       })
     
@@ -125,14 +125,14 @@
         }
 
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
         element.addEventListener('tsante-mqtt-received', (evt) => {
           expect(evt.detail.topic).to.be.equal('terminal/hello')
           expect(evt.detail.payload).to.be.equal('world')
           done()
         }, {
-          once: true
+          once: true,
         })
       })
     
@@ -147,7 +147,7 @@
         }
 
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
 
         element.addEventListener('tsante-mqtt-connect-error', (evt) => {

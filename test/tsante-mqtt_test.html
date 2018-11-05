@@ -57,7 +57,7 @@
           expect(evt.detail).to.be.a.string // eslint-disable-line
           done()
         }, {
-          once: true
+          once: true,
         })
         element.host = `ws://:${mosquittoPort}/`
       })
@@ -69,7 +69,7 @@
           expect(evt.detail.status).to.equal(true)
           done()
         }, {
-          once: true
+          once: true,
         })
         element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
       })
@@ -83,13 +83,13 @@
             element.connect()
           }
         }, {
-          once: true
+          once: true,
         })
         element.addEventListener('tsante-mqtt-error', (evt) => {
           expect(evt.detail).to.be.equal('AMQJS0011E Invalid state already connected.')
           done()
         }, {
-          once: true
+          once: true,
         })
         element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
       })
@@ -148,7 +148,7 @@
           expect(subscriber.subscribed).to.equal(true)
           done()
         }, {
-          once: true
+          once: true,
         })
         element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
       })
@@ -158,19 +158,19 @@
         let cli
         await Promise.all([
           new Promise(resolve => element.addEventListener('tsante-mqtt-connect', resolve, {
-            once: true
+            once: true,
           })),
           (element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`),
-          (cli = element.client)
+          (cli = element.client),
         ])
         await element.disconnect()
         expect(element.connected).to.equal(false)
         element.client = cli
         await Promise.all([
           new Promise(resolve => element.addEventListener('tsante-mqtt-connect', resolve, {
-            once: true
+            once: true,
           })),
-          (element.connect())
+          (element.connect()),
         ])
         const subscriber = element.querySelector('tsante-mqtt-subscriber')
         const publisher = element.querySelector('tsante-mqtt-publisher')
@@ -212,9 +212,9 @@
         const element = fixture('basic')
         await Promise.all([
           new Promise(resolve => element.addEventListener('tsante-mqtt-connect', resolve, {
-            once: true
+            once: true,
           })),
-          (element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`)
+          (element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`),
         ])
         const publisher = element.querySelector('tsante-mqtt-publisher')
         publisher.payload = 'world'
@@ -224,7 +224,7 @@
             expect(evt.detail.topic).to.be.equal('terminal/hello')
             resolve()
           }, {
-            once: true
+            once: true,
           })
         )
       })
@@ -233,9 +233,9 @@
         const element = fixture('basic')
         await Promise.all([
           new Promise(resolve => element.addEventListener('tsante-mqtt-connect', resolve, {
-            once: true
+            once: true,
           })),
-          (element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`)
+          (element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`),
         ])
         const subscribers = element.querySelectorAll('tsante-mqtt-subscriber')
         const publisher = element.querySelector('tsante-mqtt-publisher')
@@ -299,7 +299,7 @@
           expect(evt.detail.status).to.equal(true)
           done()
         }, {
-          once: true
+          once: true,
         })
         element.host = 'wss://test.mosquitto.org:8081/'
       })

@@ -11,7 +11,7 @@ Polymer({
      */
     topic: {
       type: String,
-      observer: '_topicChanged'
+      observer: '_topicChanged',
     },
     /**
      * qos
@@ -21,7 +21,7 @@ Polymer({
      */
     qos: {
       type: Number,
-      value: 0
+      value: 0,
     },
     /**
      * retain flag
@@ -29,7 +29,7 @@ Polymer({
      */
     retained: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * the payload to send
@@ -37,7 +37,7 @@ Polymer({
      */
     payload: {
       type: String,
-      value: null
+      value: null,
     },
     /**
      * the connection status of the `tsante-mqtt` ancestor
@@ -45,18 +45,18 @@ Polymer({
      */
     _connected: {
       type: Boolean,
-      value: false
+      value: false,
     },
     /**
      * the mqtt client of the `tsante-mqtt` ancestor
      * @type {Object}
      */
-    _client: Object
+    _client: Object,
   },
 
   observers: [
     '_isConnected(_connected)',
-    'publish(payload)'
+    'publish(payload)',
   ],
 
   setNeededProperties: function (connected, client) {
@@ -89,5 +89,5 @@ Polymer({
       retained = typeof retained === 'boolean' ? retained : this.retained
       this._client.send(this.topic, payload, qos, retained)
     }
-  }
+  },
 })

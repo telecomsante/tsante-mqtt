@@ -9,7 +9,7 @@ Polymer({
     topic: {
       type: String,
       value: '#',
-      observer: '_topicChanged'
+      observer: '_topicChanged',
     },
     /**
      * qos
@@ -20,7 +20,7 @@ Polymer({
      */
     qos: {
       type: Number,
-      value: null
+      value: null,
     },
     /**
      * timeout
@@ -30,7 +30,7 @@ Polymer({
      */
     timeout: {
       type: Number,
-      value: null
+      value: null,
     },
 
     /**
@@ -41,14 +41,14 @@ Polymer({
       type: Boolean,
       value: false,
       readOnly: true,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
 
     _connected: {
       type: Boolean,
-      observer: 'isConnected'
+      observer: 'isConnected',
     },
-    _client: Object
+    _client: Object,
   },
 
   isConnected: function () {
@@ -131,7 +131,7 @@ Polymer({
       client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
-        invocationContext: { topic: this.topic }
+        invocationContext: { topic: this.topic },
       })
     };
   },
@@ -179,5 +179,5 @@ Polymer({
    */
   _onError (err) {
     this.fire('tsante-mqtt-error', err.message)
-  }
+  },
 })

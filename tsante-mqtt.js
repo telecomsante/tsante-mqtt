@@ -12,7 +12,7 @@ Polymer({
      * @type {String}
      */
     host: {
-      type: String
+      type: String,
     },
 
     /**
@@ -26,7 +26,7 @@ Polymer({
       type: String,
       value: function () {
         return Math.random().toString(36).replace(/[^a-z]+/g, '')
-      }
+      },
     },
 
     /**
@@ -34,7 +34,7 @@ Polymer({
      * @type {String}
      */
     username: {
-      type: String
+      type: String,
     },
 
     /**
@@ -42,7 +42,7 @@ Polymer({
      * @type {String}
      */
     password: {
-      type: String
+      type: String,
     },
 
     /**
@@ -51,7 +51,7 @@ Polymer({
      */
     timeout: {
       type: Number,
-      value: 10
+      value: 10,
     },
 
     /**
@@ -61,7 +61,7 @@ Polymer({
      */
     retry: {
       type: Number,
-      value: 0
+      value: 0,
     },
 
     /**
@@ -72,7 +72,7 @@ Polymer({
      */
     cleanSession: {
       type: Boolean,
-      value: true
+      value: true,
     },
 
     /**
@@ -83,7 +83,7 @@ Polymer({
      */
     willMessage: {
       type: Object,
-      value: function () { return {} }
+      value: function () { return {} },
     },
 
     /**
@@ -103,14 +103,14 @@ Polymer({
       value: false,
       readOnly: true,
       reflectToAttribute: true,
-      observer: '_connectedChanged'
-    }
+      observer: '_connectedChanged',
+    },
   },
 
   observers: [
     '_sendInfoToPubSub(connected, client)',
     '_initializeClient(host,clientID)',
-    'connect(username, password)'
+    'connect(username, password)',
   ],
 
   /**
@@ -161,7 +161,7 @@ Polymer({
     this._setConnected(false)
     this.fire('tsante-mqtt-connect-error', {
       status: this.connected,
-      message: 'fail to connect'
+      message: 'fail to connect',
     })
     this._retry()
   },
@@ -256,7 +256,7 @@ Polymer({
         onSuccess: this._onConnect.bind(this),
         onFailure: this._onFail.bind(this),
         timeout: this.timeout,
-        cleanSession: this.cleanSession
+        cleanSession: this.cleanSession,
       }
       if (this.username || username) {
         this.username = this.username || username
@@ -301,6 +301,6 @@ Polymer({
    */
   _onError: function (errMessage) {
     this.fire('tsante-mqtt-error', errMessage)
-  }
+  },
 
 })
