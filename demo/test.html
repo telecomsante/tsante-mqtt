@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>tsante-mqtt demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../../iron-icon/iron-icon.html">
+    <link rel="import" href="../tsante-mqtt.html">
+
+    <style>
+        #debug { height: 300px; display:flex; flex-direction:column}
+        .log {overflow-y: auto; flex:1; }
+        .log > div { display: flex; border: 1px solid lightgray; height: 25px; align-items: center; }
+        .log > div:nth-child(even) { background: lightgray; }
+        .datetime { width: 150px; padding:0px 10px; overflow: hidden; }
+        .subscriber { width: 150px; padding:0px 10px; text-overflow: ellipsis; overflow: hidden; white-space: 
+          nowrap; display: flex; align-items: center;}
+        .topic { width: 200px; padding:0px 10px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+          display: flex; align-items: center; }
+        .payload { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+          display: flex; align-items: center; }
+        #list > div {display: flex}
+        </style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+      .vertical-section-container {
+        max-width:90%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vertical-section-container centered">
+      <h3>Subscribe demo</h3>
+      <p>the subscriber will receives messages send by the publisher above.</p>
+          <tsante-mqtt host="ws://127.0.0.1:9883/" id="demo" username='admin' password='admin'>
+            <tsante-mqtt-publisher 
+              id='publisher'></tsante-mqtt-publisher>
+            <tsante-mqtt-subscriber
+              id='subscriber1' 
+              topic="terminal/#"></tsante-mqtt-subscriber>
+              <div id='addedSubscriber'>
+                <template>
+                  <tsante-mqtt-subscriber
+                    id='subscriber' 
+                    topic="terminal/#"></tsante-mqtt-subscriber>
+                </template>
+              </div>
+          </tsante-mqtt>
+          <div style="display: flex;">
+            <div id="debug" style="flex:1; margin-right:10px">
+              <div style="display:flex; align-items: center; min-height: 25px;">
+                <span>journal</span>
+                <iron-icon icon='delete' onclick='clearLog()'></iron-icon>
+              </div>
+              <div class='log'></div>
+            </div>
+            <div id='list' style="width: 350px">
+              <div style="display:flex; align-items: center; min-height: 25px;">subscribers</div>
+            </div>
+          </div>
+          <div>
+            <p>Create subscriber</p>
+            <span>topic : terminal/location/</span><input type="text" id='newsub'>
+            <button id='subscribe'>subscribe</button>
+          </div>
+          <div>
+            <p>Publish</p>
+            <span>terminal/location/</span><input type='text' id='topic' />
+            <span>value</span> <input type='text' id='value'/>
+            <input type="checkbox" id="retain">retain</input>
+            <button id='publish'>publish</button>
+          </div>
+          <script>
+            const publisher = document.querySelector('#publisher')
+            const subscriber1 = document.querySelector('#subscriber1')
+            let indx = 2
+
+            const clearLog = () => {
+              document.querySelector('.log').innerHTML = ''
+            }
+
+            const receiveHandler = evt => {
+              const div = document.createElement('div')
+              let content = `
+              <div class='datetime'>${(new Date()).toLocaleString()}</div>
+              <div class='subscriber'>${evt.target.id}</div>
+              <div class='topic'>${evt.detail.topic}</div>
+              <div class='payload'>${evt.detail.payload}</div>
+              `
+              div.innerHTML = content
+              document.querySelector('.log').appendChild(div)
+              div.scrollIntoView({block: "end"})
+            }
+
+            const publishHandler = (evt) => {
+              const topic = `terminal/location/${document.querySelector('#topic').value}`
+              const value = document.querySelector('#value').value
+              const retain = document.querySelector('#retain').checked
+              publisher.topic = topic
+              publisher.publish(value, 0, retain)
+            }
+            document.querySelector('#publish').addEventListener('click', publishHandler)
+
+            const unsubscribe = (subscriberIndx) => {
+              console.log(`unsubscribe ${subscriberIndx}`)
+              const subscriber = document.querySelector(`#subscriber${subscriberIndx}`)
+              subscriber.parentElement.removeChild(subscriber)
+              const info = document.querySelector(`#info${subscriberIndx}`)
+              document.querySelector('#list').removeChild(info)
+            }
+
+            const newSubscriberHandler = _ => {
+              const topic = `terminal/location/${document.querySelector('#newsub').value}`
+              if(!topic) return
+              const div = document.querySelector('#addedSubscriber')
+              const tpl = div.querySelector('template')
+              const subscriber = document.importNode(tpl.content, true).querySelector('tsante-mqtt-subscriber');
+              subscriber.setAttribute('id',`subscriber${indx}`)
+              subscriber.setAttribute('topic', topic)
+              div.appendChild(subscriber)
+              subscriber.addEventListener('tsante-mqtt-received', receiveHandler)
+              document.querySelector('#newsub').value = ''
+              const item = document.createElement('div')
+              let content = `
+              <div class='subscriber'>
+                <span>subscriber${indx}</span>
+                <iron-icon icon='delete' onclick='unsubscribe(${indx})'></iron-icon>
+              </div>
+              <div class='topic'>${topic}</div>
+              `
+              item.id = `info${indx}`
+              item.innerHTML = content
+              document.querySelector('#list').appendChild(item)
+              indx++
+            }
+            document.querySelector('#subscribe').addEventListener('click', newSubscriberHandler)
+
+            subscriber1.addEventListener('tsante-mqtt-received', receiveHandler)
+          </script>
+    </div>
+  </body>
+</html>
