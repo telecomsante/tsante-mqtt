@@ -1,6 +1,6 @@
 {
   "name": "tsante-mqtt",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "scripts": {
     "postinstall": "bower install",
     "start": "polymer serve",
