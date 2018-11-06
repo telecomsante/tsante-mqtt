@@ -53,6 +53,18 @@ Polymer({
     _client: Object
   },
 
+  attached: function attached() {
+    var parent = this.parentElement;
+    while (['tsante-mqtt', 'body'].indexOf(parent.tagName.toLowerCase()) === -1) {
+      parent = parent.parentElement;
+    }
+    this.subscribe(parent.connected, parent.client);
+  },
+
+  detached: function detached() {
+    this.unsubscribe(this.topic);
+  },
+
   isConnected: function isConnected() {
     if (!this._connected && this.subscribed) this.unsubscribe();
   },
@@ -114,8 +126,8 @@ Polymer({
   _topicChanged: function _topicChanged(newValue, oldValue) {
     if (newValue !== oldValue) {
       if (oldValue && this.subscribed) {
+        this.addEventListener('tsante-mqtt-subscribed', this.subscribe, { once: true });
         this.unsubscribe(oldValue);
-        this.addEventListener('tsante-mqtt-subscribed', this.subscribe);
       } else {
         this.subscribe();
       }
@@ -131,9 +143,10 @@ Polymer({
    * @param {*} client the mqtt client of the tsante-mqtt parent
    */
   subscribe: function subscribe(connected, client) {
-    if (connected && !this.subscribed) {
-      this.removeEventListener('tsante-mqtt-subscribed', this.subscribe);
-      client.subscribe(this.topic, {
+    this._client = this._client || client;
+    this._connected = this._connected || connected;
+    if (this._connected && !this.subscribed) {
+      this._client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
         invocationContext: { topic: this.topic }

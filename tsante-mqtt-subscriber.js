@@ -9,7 +9,7 @@ Polymer({
     topic: {
       type: String,
       value: '#',
-      observer: '_topicChanged'
+      observer: '_topicChanged',
     },
     /**
      * qos
@@ -20,7 +20,7 @@ Polymer({
      */
     qos: {
       type: Number,
-      value: null
+      value: null,
     },
     /**
      * timeout
@@ -30,7 +30,7 @@ Polymer({
      */
     timeout: {
       type: Number,
-      value: null
+      value: null,
     },
 
     /**
@@ -41,14 +41,26 @@ Polymer({
       type: Boolean,
       value: false,
       readOnly: true,
-      reflectToAttribute: true
+      reflectToAttribute: true,
     },
 
     _connected: {
       type: Boolean,
-      observer: 'isConnected'
+      observer: 'isConnected',
     },
-    _client: Object
+    _client: Object,
+  },
+
+  attached: function () {
+    let parent = this.parentElement
+    while (['tsante-mqtt', 'body'].indexOf(parent.tagName.toLowerCase()) === -1) {
+      parent = parent.parentElement
+    }
+    this.subscribe(parent.connected, parent.client)
+  },
+
+  detached: function () {
+    this.unsubscribe(this.topic)
   },
 
   isConnected: function () {
@@ -109,8 +121,8 @@ Polymer({
   _topicChanged: function (newValue, oldValue) {
     if (newValue !== oldValue) {
       if (oldValue && this.subscribed) {
+        this.addEventListener('tsante-mqtt-subscribed', this.subscribe, {once: true})
         this.unsubscribe(oldValue)
-        this.addEventListener('tsante-mqtt-subscribed', this.subscribe)
       } else {
         this.subscribe()
       }
@@ -126,12 +138,13 @@ Polymer({
    * @param {*} client the mqtt client of the tsante-mqtt parent
    */
   subscribe: function (connected, client) {
-    if (connected && !this.subscribed) {
-      this.removeEventListener('tsante-mqtt-subscribed', this.subscribe)
-      client.subscribe(this.topic, {
+    this._client = this._client || client
+    this._connected = this._connected || connected
+    if (this._connected && !this.subscribed) {
+      this._client.subscribe(this.topic, {
         onSuccess: this._onSubscribe.bind(this),
         onFailure: this._onSubscribeFail.bind(this),
-        invocationContext: { topic: this.topic }
+        invocationContext: { topic: this.topic },
       })
     };
   },
@@ -179,5 +192,5 @@ Polymer({
    */
   _onError (err) {
     this.fire('tsante-mqtt-error', err.message)
-  }
+  },
 })

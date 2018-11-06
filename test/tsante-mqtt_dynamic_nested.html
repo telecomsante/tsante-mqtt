@@ -18,22 +18,26 @@
   <test-fixture id="nested">
     <template>
       <tsante-mqtt>
-        <div>
-          <tsante-mqtt-subscriber id="subscriber1" topic="terminal/#"></tsante-mqtt-subscriber>
-          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
-        </div>
-        <div>
-          <tsante-mqtt-subscriber id="subscriber2" topic="terminal/hello"></tsante-mqtt-subscriber>
-          <tsante-mqtt-subscriber id="subscriber3" topic="terminal/hello/world"></tsante-mqtt-subscriber>
-        </div>
+        <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+        <tsante-mqtt-subscriber id="subscriber1" topic="terminal/#"></tsante-mqtt-subscriber>
       </tsante-mqtt>
     </template>
   </test-fixture>
 
+  <test-fixture id="detached">
+      <template>
+        <tsante-mqtt>
+          <tsante-mqtt-publisher topic="terminal/hello"></tsante-mqtt-publisher>
+          <tsante-mqtt-subscriber id="subscriber1" topic="terminal/#"></tsante-mqtt-subscriber>
+          <tsante-mqtt-subscriber id="subscriber2" topic="terminal/hello"></tsante-mqtt-subscriber>
+        </tsante-mqtt>
+      </template>
+    </test-fixture>
+
   <div id="mocha"></div>
 
   <script>
-    describe('tsante-mqtt nested subscribers', function () {
+    describe('tsante-mqtt nested dynamic subscribers', function () {
       const mosquittoUrl = '127.0.0.1'
       const mosquittoPort = '9883'
 
@@ -45,7 +49,7 @@
         }
       })
 
-      it('subscribers should automatically subscribe on connect', (done) => {
+      it('subscribers should automatically subscribe on attach', (done) => {
         const element = fixture('nested')
         const expected = [
           {
@@ -62,19 +66,18 @@
               status: true,
             },
           },
-          {
-            id: 'subscriber3',
-            detail: {
-              topic: 'terminal/hello/world',
-              status: true,
-            },
-          },
         ]
+
+        const newSubscriber = document.createElement('tsante-mqtt-subscriber')
+        newSubscriber.id = 'subscriber2'
+        newSubscriber.topic = 'terminal/hello'
+        element.appendChild(newSubscriber)
+
         const subscribedHandler = sinon.spy()
         element.addEventListener('tsante-mqtt-subscribed', subscribedHandler)
         element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
         setTimeout(() => {
-          expect(subscribedHandler.callCount).to.equal(3)
+          expect(subscribedHandler.callCount).to.equal(2)
           const events = subscribedHandler.getCalls()
             .map(call => ({
               id: call.args[0].target.id,
@@ -85,7 +88,7 @@
         }, 2000)
       })
 
-      it('subscribers should received one message on reconnect', (done) => {
+      it('subscribers should received one message on attach', (done) => {
         const element = fixture('nested')
         const expected = [
           {
@@ -107,6 +110,11 @@
         const publisher = element.querySelector('tsante-mqtt-publisher')
         publisher.payload = 'world'
 
+        const newSubscriber = document.createElement('tsante-mqtt-subscriber')
+        newSubscriber.id = 'subscriber2'
+        newSubscriber.topic = 'terminal/hello'
+        element.appendChild(newSubscriber)
+
         const receiveHandler = sinon.spy()
         element.addEventListener('tsante-mqtt-received', receiveHandler)
         element.host = `ws://${mosquittoUrl}:${mosquittoPort}/`
@@ -121,6 +129,7 @@
           done()
         }, 2000)
       })
+    
     })
   </script>
 </body>

@@ -56,7 +56,7 @@
           done()
         };
         element.addEventListener('tsante-mqtt-connect-error', check, {
-          once: true
+          once: true,
         })
       })
 
@@ -87,7 +87,7 @@
           done()
         };
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
       })
 
@@ -107,7 +107,7 @@
           done()
         };
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
       })
 
@@ -124,14 +124,14 @@
           publisher.payload = 'world'
         };
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
         element.addEventListener('tsante-mqtt-received', (evt) => {
           expect(evt.detail.topic).to.be.equal('terminal/hello')
           expect(evt.detail.payload).to.be.equal('world')
           done()
         }, {
-          once: true
+          once: true,
         })
       })
 
@@ -145,7 +145,7 @@
           publisher.payload = 'world'
         };
         element.addEventListener('tsante-mqtt-connect', check, {
-          once: true
+          once: true,
         })
         element.addEventListener('tsante-mqtt-connect-error', (evt) => {
           done(false)
