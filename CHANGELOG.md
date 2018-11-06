@@ -1,6 +1,7 @@
-## current
+## 1.4.2
 
-Fix issue #15
+- Fix issue #15 : on changing the topic of a subscriber, it must unsubscribe the old topic, then subscribe to the now one.
+- Fix issue #17 : Subscribers dynamically added to the the DOM must automatically subscribe
 
 ## 1.4.1
 
