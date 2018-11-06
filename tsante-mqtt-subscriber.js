@@ -59,6 +59,10 @@ Polymer({
     this.subscribe(parent.connected, parent.client)
   },
 
+  detached: function () {
+    this.unsubscribe(this.topic)
+  },
+
   isConnected: function () {
     if (!this._connected && this.subscribed) this.unsubscribe()
   },
